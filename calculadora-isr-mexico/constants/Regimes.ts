@@ -18,7 +18,7 @@ export const REGIMES: RegimeConfig[] = [
     title: 'Persona Moral',
     subtitle: 'Régimen General',
     icon: 'office-building',
-    enabled: true,
+    enabled: true,  // ← Asegúrate que dice true
     characteristics: PERSONA_MORAL_CHARACTERISTICS,
   },
   {
