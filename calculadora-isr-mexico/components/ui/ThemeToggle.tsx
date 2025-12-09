@@ -1,8 +1,8 @@
 // components/ui/ThemeToggle.tsx
-// Componente para cambiar entre modo claro y oscuro
+// Botón circular para cambiar entre modo claro y oscuro
 
 import React from 'react';
-import { View, Switch, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ThemeToggleProps {
@@ -20,38 +20,38 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   iconColorActive = '#14B8A6',
   iconColorInactive = '#64748B',
 }) => {
+  const backgroundColor = isDarkMode ? accentColor : 'transparent';
+  const borderColor = accentColor;
+  const iconName = isDarkMode ? 'moon-waning-crescent' : 'white-balance-sunny';
+  const iconColor = isDarkMode ? iconColorActive : iconColorInactive;
+
   return (
-    <View style={styles.container}>
-      <MaterialCommunityIcons
-        name="white-balance-sunny"
-        size={20}
-        color={isDarkMode ? iconColorInactive : iconColorActive}
-      />
-      <Switch
-        value={isDarkMode}
-        onValueChange={onToggle}
-        trackColor={{ false: '#CBD5E1', true: accentColor }}
-        thumbColor={isDarkMode ? iconColorActive : '#F1F5F9'}
-        ios_backgroundColor="#CBD5E1"
-        style={styles.switch}
-      />
-      <MaterialCommunityIcons
-        name="moon-waning-crescent"
-        size={20}
-        color={isDarkMode ? iconColorActive : iconColorInactive}
-      />
-    </View>
+    <Pressable
+      onPress={onToggle}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor: pressed
+            ? isDarkMode
+              ? accentColor
+              : '#0b1720'
+            : backgroundColor,
+          borderColor,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons name={iconName} size={18} color={iconColor} />
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
+  button: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
     alignItems: 'center',
-    marginTop: 12,
-    gap: 8,
-  },
-  switch: {
-    marginHorizontal: 4,
+    justifyContent: 'center',
   },
 });

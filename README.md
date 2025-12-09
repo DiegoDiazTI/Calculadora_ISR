@@ -1,4 +1,4 @@
-<h1 align="center">📱 Calculadora ISR México</h1>
+<h1 align="center">📱 Calculadora ISR Diego Diaz</h1>
 
 <p align="center">
   Calcula tu ISR según tu régimen fiscal: RESICO, Persona Moral y Tablas ISR.

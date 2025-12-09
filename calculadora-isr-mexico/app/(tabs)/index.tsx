@@ -10,6 +10,7 @@ import {
   Animated,
   Platform,
   KeyboardAvoidingView,
+  Text,
 } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useCalculator } from '@/hooks/useCalculator';
@@ -55,6 +56,10 @@ export default function Index() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={theme.statusBar as any} backgroundColor={theme.background} />
+
+      {/* Header full-width con logo y toggle */}
+      <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -66,8 +71,16 @@ export default function Index() {
           keyboardShouldPersistTaps="handled"
         >
           <Animated.View style={{ opacity: fadeAnim }}>
-            {/* Header con toggle de tema */}
-            <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+            {/* ---------- Título del body ---------- */}
+            <Animated.View style={styles.titleSection}>
+              <Text style={[styles.mainTitle, { color: theme.text }]}>
+                Calculadora ISR
+              </Text>
+
+              <Text style={[styles.mainSubtitle, { color: theme.textSecondary }]}>
+                Calcula tu impuesto según tu régimen fiscal
+              </Text>
+            </Animated.View>
 
             {/* Selector de régimen */}
             <RegimeSelector
@@ -120,7 +133,12 @@ export default function Index() {
 
                 {/* Resultados */}
                 {showResults && result && (
-                  <ResultsCard result={result} income={income} regime={selectedRegime} theme={theme} />
+                  <ResultsCard
+                    result={result}
+                    income={income}
+                    regime={selectedRegime}
+                    theme={theme}
+                  />
                 )}
               </>
             )}
@@ -150,5 +168,20 @@ const styles = StyleSheet.create({
   },
   calculateButton: {
     marginBottom: 24,
+  },
+  titleSection: {
+    marginTop: 20,
+    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mainTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    letterSpacing: -0.5,
+  },
+  mainSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
   },
 });

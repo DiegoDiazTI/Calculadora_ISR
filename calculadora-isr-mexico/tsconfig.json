@@ -10,7 +10,8 @@
       "@/hooks/*": ["./hooks/*"],
       "@/utils/*": ["./utils/*"],
       "@/types": ["./types"],
-      "@/types/*": ["./types/*"]
+      "@/types/*": ["./types/*"],
+      "typeRoots": ["./types", "./node_modules/@types"]
     }
   },
   "include": [

@@ -1,11 +1,12 @@
 // components/layout/Header.tsx
-// Header de la aplicación con título y toggle de tema
+// Header full width en cualquier plataforma, con fondo oscuro fijo
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, StyleSheet, Platform, Image, SafeAreaView } from 'react-native';
 import { ThemeColors } from '@/types';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { DARK_THEME } from '@/constants/Theme';
+import LogoDiego from '../../assets/Logo/logo_diego.svg';
 
 interface HeaderProps {
   theme: ThemeColors;
@@ -13,56 +14,64 @@ interface HeaderProps {
   onToggleTheme: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ theme, isDarkMode, onToggleTheme }) => {
-  return (
-    <View style={styles.header}>
-      <View style={[styles.iconContainer, { backgroundColor: theme.accent }]}>
-        <MaterialCommunityIcons name="calculator" size={32} color="#FFFFFF" />
-      </View>
-      <Text style={[styles.title, { color: theme.text }]}>Calculadora ISR</Text>
-      <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-        Calcula tu impuesto según tu régimen fiscal
-      </Text>
+const HEADER_BG = DARK_THEME.background;
 
-      <ThemeToggle
-        isDarkMode={isDarkMode}
-        onToggle={onToggleTheme}
-        accentColor={theme.accent}
-        iconColorActive={theme.accentLight}
-        iconColorInactive={theme.textTertiary}
-      />
-    </View>
+export const Header: React.FC<HeaderProps> = ({
+  theme,
+  isDarkMode,
+  onToggleTheme,
+}) => {
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: HEADER_BG }]}>
+      <View style={styles.headerContainer}>
+        {/* Logo */}
+        {Platform.OS === 'web' ? (
+          <Image
+            source={require('../../assets/Logo/logo_diego.svg')}
+            style={styles.logoWeb}
+            resizeMode="contain"
+          />
+        ) : (
+          <LogoDiego width={110} height={30} />
+        )}
+
+        {/* Botón de tema */}
+        <ThemeToggle
+          isDarkMode={isDarkMode}
+          onToggle={onToggleTheme}
+          accentColor={theme.accent}
+          iconColorActive={theme.accentLight}
+          iconColorInactive={theme.textTertiary}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
+  // Asegura que el header use TODA el área segura + ancho total
+  safeArea: {
+    width: '100%',
+    alignSelf: 'stretch',
+    backgroundColor: HEADER_BG,
+  },
+
+  // Contenedor interno del header, sin dejar huecos laterales
+  headerContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 30,
+
+    // 🔥 Hace que el header ignore padding del contenedor padre
+    alignSelf: 'stretch',
   },
-  iconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#0F766E',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
+
+  logoWeb: {
+    width: 110,
+    height: 30,
   },
 });
