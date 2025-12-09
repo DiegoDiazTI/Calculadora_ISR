@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+<h1 align="center">📱 Calculadora ISR México</h1>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  Calcula tu ISR según tu régimen fiscal: RESICO, Persona Moral y Tablas ISR.
+</p>
 
-## Get started
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-React%20Native-1B1F23?style=for-the-badge&logo=expo&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/ISR-México-0A9396?style=for-the-badge" />
+</p>
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Funcionalidades
 
-2. Start the app
+### 🧍‍♂️ **RESICO – Persona Física**
+- Ingresos máximos de **$3,500,000** anuales  
+- Tasas reducidas del **1% al 2.5%**  
+- Cálculo directo sobre ingresos  
+- No existen deducciones personales  
+- Tabla interactiva de tasas RESICO según el rango de ingresos  
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+### 🏢 **Persona Moral – Régimen General**
+- Tasa general del **30%** sobre la utilidad fiscal  
+- Aplica a sociedades y empresas  
+- Permite deducciones autorizadas  
+- Flujo simplificado para simular ISR empresarial  
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 📊 **Tablas ISR**
+- Consulta de tablas del SAT  
+- Límites inferiores, superiores, cuotas fijas y porcentajes aplicables  
+- Datos estructurados en constantes para actualizaciones fáciles  
 
-## Get a fresh project
+---
 
-When you're ready, run:
+### 🎨 **Diseño y experiencia**
+- Modo **claro / oscuro**  
+- Componentes reutilizables (tarjetas, inputs, botones, indicadores)  
+- UI moderna con enfoque profesional  
+- Arquitectura modular y mantenible  
 
-```bash
-npm run reset-project
-```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🖼 Vista previa de la aplicación
 
-## Learn more
+> *(Puedes agregar aquí capturas de pantalla del repo)*
 
-To learn more about developing your project with Expo, look at the following resources:
+| Inicio | RESICO PF | Persona Moral |
+|-------|------------|---------------|
+|  |  | |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 🛠 Stack Tecnológico
 
-Join our community of developers creating universal apps.
+- **Expo + React Native**
+- **TypeScript**
+- **expo-router**
+- **Custom Hooks**
+- **Arquitectura por módulos**
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
