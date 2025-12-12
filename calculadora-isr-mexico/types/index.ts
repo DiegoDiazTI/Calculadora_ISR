@@ -1,7 +1,7 @@
 // types/index.ts
 // Definiciones de tipos para toda la aplicación
 
-export type RegimeType = 'RESICO' | 'MORAL' | 'TABLES';
+export type RegimeType = 'RESICO' | 'MORAL' | 'EMPRESARIAL' | 'TABLES';
 
 export interface TaxBracket {
   min: number;

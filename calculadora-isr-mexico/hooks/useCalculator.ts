@@ -3,7 +3,11 @@
 
 import { useState } from 'react';
 import { RegimeType, CalculationResult } from '@/types';
-import { calculateResicoISR, calculateMoralISR } from '@/utils/calculations';
+import { 
+  calculateResicoISR, 
+  calculateMoralISR,
+  calculateActividadEmpresarialISR 
+} from '@/utils/calculations';
 import { formatCurrencyInput, parseCurrency } from '@/utils/formatters';
 
 export const useCalculator = () => {
@@ -47,6 +51,10 @@ export const useCalculator = () => {
       calculationResult = calculateResicoISR(income);
     } else if (selectedRegime === 'MORAL') {
       calculationResult = calculateMoralISR(income);
+    } else if (selectedRegime === 'EMPRESARIAL') {
+      // Para Actividad Empresarial en modo simple, asumimos 0 deducciones
+      // (base gravable = ingresos totales)
+      calculationResult = calculateActividadEmpresarialISR(income);
     } else {
       calculationResult = {
         tax: 0,

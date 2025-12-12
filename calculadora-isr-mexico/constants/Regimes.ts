@@ -2,7 +2,11 @@
 // Configuración de regímenes fiscales
 
 import { RegimeConfig } from '@/types';
-import { RESICO_CHARACTERISTICS, PERSONA_MORAL_CHARACTERISTICS } from './TaxTables';
+import { 
+  RESICO_CHARACTERISTICS, 
+  PERSONA_MORAL_CHARACTERISTICS,
+  ACTIVIDAD_EMPRESARIAL_CHARACTERISTICS 
+} from './TaxTables';
 
 export const REGIMES: RegimeConfig[] = [
   {
@@ -14,11 +18,19 @@ export const REGIMES: RegimeConfig[] = [
     characteristics: RESICO_CHARACTERISTICS,
   },
   {
+    id: 'EMPRESARIAL',
+    title: 'Actividad Empresarial',
+    subtitle: 'Persona Física',
+    icon: 'briefcase',
+    enabled: true,
+    characteristics: ACTIVIDAD_EMPRESARIAL_CHARACTERISTICS,
+  },
+  {
     id: 'MORAL',
     title: 'Persona Moral',
     subtitle: 'Régimen General',
     icon: 'office-building',
-    enabled: true,  // ← Asegúrate que dice true
+    enabled: true,
     characteristics: PERSONA_MORAL_CHARACTERISTICS,
   },
   {

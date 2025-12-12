@@ -5,7 +5,9 @@ import { CalculationResult, TaxBracket } from '@/types';
 import { 
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
-  PERSONA_MORAL_RATE 
+  PERSONA_MORAL_RATE,
+  ACTIVIDAD_EMPRESARIAL_TABLE_2025,
+  TaxBracketWithQuota
 } from '@/constants/TaxTables';
 
 /**
@@ -79,6 +81,48 @@ export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
     rate: PERSONA_MORAL_RATE * 100,
     bracket: 'Tasa General',
     netIncome: utilityFiscal - tax,
+  };
+};
+
+/**
+ * Calcula el ISR para Actividad Empresarial (Persona Física)
+ * Sistema progresivo: Cuota Fija + (Excedente del límite inferior × Tasa)
+ * @param taxableBase - Base gravable (ingresos - deducciones)
+ * @returns Resultado del cálculo
+ */
+export const calculateActividadEmpresarialISR = (taxableBase: number): CalculationResult => {
+  // Validación de entrada
+  if (isNaN(taxableBase) || taxableBase <= 0) {
+    return {
+      tax: 0,
+      rate: 0,
+      bracket: 'N/A',
+      netIncome: 0,
+    };
+  }
+
+  // Buscar el tramo correspondiente
+  for (let bracket of ACTIVIDAD_EMPRESARIAL_TABLE_2025) {
+    if (taxableBase >= bracket.min && taxableBase <= bracket.max) {
+      // Cálculo: Cuota Fija + (Excedente × Tasa)
+      const excess = taxableBase - bracket.min;
+      const tax = bracket.fixedFee + (excess * bracket.rate);
+      
+      return {
+        tax: tax,
+        rate: bracket.rate * 100,
+        bracket: `$${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        netIncome: taxableBase - tax,
+      };
+    }
+  }
+
+  // Si no encuentra tramo (no debería pasar)
+  return {
+    tax: 0,
+    rate: 0,
+    bracket: 'Error en cálculo',
+    netIncome: taxableBase,
   };
 };
 

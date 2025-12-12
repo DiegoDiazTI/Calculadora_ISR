@@ -1,5 +1,5 @@
 // components/calculator/RegimeSelector.tsx
-// Selector de régimen fiscal
+// Selector de régimen fiscal - MEJORADO con círculos siempre visibles
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
@@ -26,8 +26,12 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
 
       {REGIMES.map((regime) => {
         const isSelected = selectedRegime === regime.id;
-        const iconColor = regime.id === 'TABLES' ? '#FFFFFF' : '#FFFFFF';
-        const iconBg = regime.id === 'TABLES' ? '#991B1B' : theme.accent;
+        
+        // Determinar color del icono según el régimen
+        let iconBg = theme.accent;
+        if (regime.id === 'TABLES') {
+          iconBg = '#991B1B'; // Rojo para Tablas ISR
+        }
 
         return (
           <TouchableOpacity
@@ -43,18 +47,41 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
             onPress={() => onSelectRegime(regime.id)}
             activeOpacity={0.7}
           >
+            {/* Icono del régimen */}
             <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
-              <MaterialCommunityIcons name={regime.icon as any} size={24} color={iconColor} />
+              <MaterialCommunityIcons 
+                name={regime.icon as any} 
+                size={24} 
+                color="#FFFFFF" 
+              />
             </View>
+
+            {/* Texto del régimen */}
             <View style={styles.textContainer}>
-              <Text style={[styles.title, { color: theme.text }]}>{regime.title}</Text>
+              <Text style={[styles.title, { color: theme.text }]}>
+                {regime.title}
+              </Text>
               <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
                 {regime.subtitle}
               </Text>
             </View>
-            {isSelected && (
-              <MaterialCommunityIcons name="check-circle" size={24} color={theme.accentLight} />
-            )}
+
+            {/* Círculo de selección - SIEMPRE VISIBLE */}
+            <View style={[
+              styles.radioOuter,
+              { 
+                borderColor: isSelected ? theme.accentLight : theme.border,
+                backgroundColor: isSelected ? theme.accentLight : 'transparent'
+              }
+            ]}>
+              {isSelected && (
+                <MaterialCommunityIcons 
+                  name="check" 
+                  size={16} 
+                  color="#FFFFFF" 
+                />
+              )}
+            </View>
           </TouchableOpacity>
         );
       })}
@@ -97,5 +124,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
+  },
+  radioOuter: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -9,21 +9,37 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#14B8A6',
+        tabBarInactiveTintColor: '#64748B',
         headerShown: false,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          backgroundColor: '#1E293B',
+          borderTopColor: '#334155',
+          borderTopWidth: 1,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 5,
+          paddingTop: 5,
+          height: Platform.OS === 'ios' ? 85 : 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Calculadora',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="calculator" size={28} color={color} />
+          title: 'Simple',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="calculator" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="advanced"
+        options={{
+          title: 'Avanzada',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="calculator-variant" size={size} color={color} />
           ),
         }}
       />
