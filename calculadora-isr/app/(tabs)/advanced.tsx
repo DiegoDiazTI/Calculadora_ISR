@@ -59,6 +59,13 @@ export default function Advanced() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={theme.statusBar as any} backgroundColor={theme.background} />
+      
+      {/* Header fijo */}
+      <View style={styles.headerContainer}>
+        <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+      </View>
+
+      {/* Contenido con scroll */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -70,9 +77,6 @@ export default function Advanced() {
           keyboardShouldPersistTaps="handled"
         >
           <Animated.View style={{ opacity: fadeAnim }}>
-            {/* Header */}
-            <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
-
             {/* Info Badge */}
             <View style={[styles.infoBadge, { backgroundColor: theme.accentBg + '20', borderColor: theme.accentLight }]}>
               <MaterialCommunityIcons name="information" size={20} color={theme.accentLight} />
@@ -454,6 +458,10 @@ export default function Advanced() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerContainer: {
+    // Header fijo en la parte superior
+    zIndex: 10,
   },
   keyboardView: {
     flex: 1,

@@ -36,12 +36,13 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="advanced"
-        options={{
+        options={{ href: null, }
+          /*{
           title: 'Avanzada',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="calculator-variant" size={size} color={color} />
           ),
-        }}
+        }*/}
       />
     </Tabs>
   );

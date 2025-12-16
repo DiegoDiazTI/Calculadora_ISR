@@ -10,6 +10,7 @@ import {
   Animated,
   Platform,
   KeyboardAvoidingView,
+  View,
 } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useCalculator } from '@/hooks/useCalculator';
@@ -19,7 +20,7 @@ import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ResultsCard } from '@/components/calculator/ResultsCard';
-import  TaxTable  from '@/components/calculator/TaxTable';
+import { AllTaxTables } from '@/components/calculator/AllTaxTables';
 import { REGIMES } from '@/constants/Regimes';
 import { parseCurrency } from '@/utils/formatters';
 
@@ -48,7 +49,6 @@ export default function Index() {
   // Obtener características del régimen seleccionado
   const currentRegime = REGIMES.find((r) => r.id === selectedRegime);
   const showCharacteristics = currentRegime && currentRegime.id !== 'TABLES';
-  const showTaxTable = selectedRegime === 'RESICO';
 
   // Determinar el label del input según el régimen
   const getInputLabel = () => {
@@ -69,6 +69,13 @@ export default function Index() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={theme.statusBar as any} backgroundColor={theme.background} />
+      
+      {/* Header fijo */}
+      <View style={styles.headerContainer}>
+        <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+      </View>
+
+      {/* Contenido con scroll */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -80,9 +87,6 @@ export default function Index() {
           keyboardShouldPersistTaps="handled"
         >
           <Animated.View style={{ opacity: fadeAnim }}>
-            {/* Header con toggle de tema */}
-            <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
-
             {/* Selector de régimen */}
             <RegimeSelector
               selectedRegime={selectedRegime}
@@ -90,24 +94,27 @@ export default function Index() {
               theme={theme}
             />
 
-            {/* Características del régimen */}
-            {showCharacteristics && currentRegime && (
-              <CharacteristicsCard
-                title={
-                  selectedRegime === 'RESICO'
-                    ? 'Características del RESICO'
-                    : selectedRegime === 'EMPRESARIAL'
-                    ? 'Características de Actividad Empresarial'
-                    : 'Características de Persona Moral'
-                }
-                characteristics={currentRegime.characteristics}
-                theme={theme}
-              />
-            )}
-
-            {/* Input de ingresos - solo mostrar si no es TABLES */}
-            {selectedRegime !== 'TABLES' && (
+            {/* Mostrar Tablas ISR cuando se selecciona TABLES */}
+            {selectedRegime === 'TABLES' ? (
+              <AllTaxTables theme={theme} />
+            ) : (
               <>
+                {/* Características del régimen */}
+                {showCharacteristics && currentRegime && (
+                  <CharacteristicsCard
+                    title={
+                      selectedRegime === 'RESICO'
+                        ? 'Características del RESICO'
+                        : selectedRegime === 'EMPRESARIAL'
+                        ? 'Características de Actividad Empresarial'
+                        : 'Características de Persona Moral'
+                    }
+                    characteristics={currentRegime.characteristics}
+                    theme={theme}
+                  />
+                )}
+
+                {/* Input de ingresos */}
                 <Input
                   label={getInputLabel()}
                   prefix="$"
@@ -138,9 +145,6 @@ export default function Index() {
                 )}
               </>
             )}
-
-            {/* Tabla de tasas - solo para RESICO */}
-            {showTaxTable && <TaxTable theme={theme} />}
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -151,6 +155,9 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerContainer: {
+    zIndex: 10,
   },
   keyboardView: {
     flex: 1,
