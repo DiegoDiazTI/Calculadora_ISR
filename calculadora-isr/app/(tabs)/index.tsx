@@ -23,8 +23,11 @@ import { ResultsCard } from '@/components/calculator/ResultsCard';
 import { AllTaxTables } from '@/components/calculator/AllTaxTables';
 import { REGIMES } from '@/constants/Regimes';
 import { parseCurrency } from '@/utils/formatters';
+import { SplashScreen } from '@/components/layout/SplashScreen';
 
 export default function Index() {
+
+   const [showSplash, setShowSplash] = useState(true);
   const { isDarkMode, theme, toggleTheme } = useTheme();
   const {
     selectedRegime,
@@ -65,7 +68,9 @@ export default function Index() {
   };
 
   const income = parseCurrency(annualIncome);
-
+ if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={theme.statusBar as any} backgroundColor={theme.background} />

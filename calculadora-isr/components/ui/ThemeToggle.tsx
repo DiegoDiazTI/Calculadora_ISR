@@ -20,8 +20,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   iconColorActive = '#14B8A6',
   iconColorInactive = '#64748B',
 }) => {
-  const backgroundColor = isDarkMode ? accentColor : 'transparent';
-  const borderColor = accentColor;
+  const backgroundColor = isDarkMode ? accentColor : 'rgba(15, 118, 110, 0.12)';
+  const borderColor = backgroundColor;
   const iconName = isDarkMode ? 'moon-waning-crescent' : 'white-balance-sunny';
   const iconColor = isDarkMode ? iconColorActive : iconColorInactive;
 

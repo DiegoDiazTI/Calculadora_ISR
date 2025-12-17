@@ -4,93 +4,92 @@
 import { ThemeColors } from '@/types';
 
 /**
- * Tema Oscuro
+ * Tema Oscuro - Colores corporativos Díaz Lara
  */
 export const DARK_THEME: ThemeColors = {
-  background: '#0F172A',
-  cardBackground: '#1E293B',
+  background: '#000000',                     // Negro corporativo
+  cardBackground: '#2c2627',                 // Gray Dark corporativo
   text: '#FFFFFF',
-  textSecondary: '#94A3B8',
-  textTertiary: '#64748B',
-  border: '#334155',
-  accent: '#0F766E',
-  accentLight: '#14B8A6',
-  accentBg: '#0F766E',
+  textSecondary: '#E5E7EB',
+  textTertiary: '#9CA3AF',
+  border: 'rgba(0, 74, 74, 0.15)',          // Teal translúcido
+  accent: '#004a4a',                         // Teal Primary corporativo
+  accentLight: '#005a5a',
+  accentBg: '#004a4a',
   cardBorder: 'transparent',
-  inputBg: '#1E293B',
-  inputBorder: '#334155',
-  disabledIcon: '#334155',
+  inputBg: 'rgba(255, 255, 255, 0.05)',
+  inputBorder: 'rgba(255, 255, 255, 0.1)',
+  disabledIcon: '#64748B',
   disabledText: '#64748B',
-  characteristicsCard: '#0F766E',
-  characteristicsText: '#D1FAE5',
-  resultCard: '#0F766E',
-  resultCardText: '#D1FAE5',
-  detailCard: '#0F172A',
+  characteristicsCard: 'rgba(0, 74, 74, 0.15)', // Teal translúcido
+  characteristicsText: '#E5E7EB',
+  resultCard: '#004a4a',                     // Teal Primary
+  resultCardText: '#FFFFFF',
+  detailCard: 'rgba(0, 74, 74, 0.15)',
   statusBar: 'light-content',
 };
 
 /**
- * Tema Claro
+ * Tema Claro - Colores corporativos Díaz Lara
  */
 export const LIGHT_THEME: ThemeColors = {
-  background: '#F8FAFC',
+  background: '#f8f7f4',                     // Cream corporativo
   cardBackground: '#FFFFFF',
-  text: '#0F172A',
-  textSecondary: '#64748B',
-  textTertiary: '#94A3B8',
-  border: '#E2E8F0',
-  accent: '#0F766E',
-  accentLight: '#14B8A6',
-  accentBg: '#14B8A6',
-  cardBorder: '#E2E8F0',
+  text: '#2c2627',                           // Gray Dark corporativo
+  textSecondary: '#6b7280',
+  textTertiary: '#9ca3af',
+  border: 'rgba(0, 74, 74, 0.08)',          // Teal translúcido claro
+  accent: '#004a4a',                         // Teal Primary corporativo
+  accentLight: '#005a5a',
+  accentBg: '#004a4a',
+  cardBorder: 'rgba(0, 74, 74, 0.08)',
   inputBg: '#FFFFFF',
-  inputBorder: '#CBD5E1',
+  inputBorder: 'rgba(0, 74, 74, 0.08)',
   disabledIcon: '#CBD5E1',
   disabledText: '#94A3B8',
-  characteristicsCard: '#14B8A6',
-  characteristicsText: '#FFFFFF',
-  resultCard: '#14B8A6',
+  characteristicsCard: 'rgba(0, 74, 74, 0.1)', // Teal translúcido
+  characteristicsText: '#2c2627',
+  resultCard: '#004a4a',                     // Teal Primary
   resultCardText: '#FFFFFF',
-  detailCard: '#F1F5F9',
+  detailCard: 'rgba(0, 74, 74, 0.05)',
   statusBar: 'dark-content',
 };
 
 /**
- * Colores compartidos (no cambian con el tema)
+ * Colores corporativos Díaz Lara
  */
 export const SHARED_COLORS = {
   teal: {
-    50: '#F0FDFA',
-    100: '#CCFBF1',
-    200: '#99F6E4',
-    300: '#5EEAD4',
-    400: '#2DD4BF',
-    500: '#14B8A6',
-    600: '#0D9488',
-    700: '#0F766E',
-    800: '#115E59',
-    900: '#134E4A',
+    primary: '#004a4a',      // Teal Primary
+    dark: '#0a2127',         // Teal Dark
+    light: '#005a5a',
+    translucent: 'rgba(0, 74, 74, 0.1)',
   },
   red: {
-    700: '#991B1B',
-    800: '#7F1D1D',
+    accent: '#780109',       // Accent Red (hover effects)
+    hover: '#8b0109',
   },
+  gray: {
+    dark: '#2c2627',         // Gray Dark
+    light: '#6b7280',
+  },
+  cream: '#f8f7f4',          // Cream (fondo modo claro)
   white: '#FFFFFF',
   black: '#000000',
 };
 
 /**
- * Tamaños de fuente
+ * Tamaños de fuente - Tipografía corporativa Díaz Lara
  */
 export const FONT_SIZES = {
-  xs: 11,
-  sm: 13,
-  base: 14,
-  lg: 16,
-  xl: 18,
-  '2xl': 24,
-  '3xl': 28,
-  '4xl': 32,
+  xs: 11,       // Captions
+  sm: 13,       // Labels
+  base: 14,     // Texto del cuerpo
+  lg: 16,       // Subtítulos
+  xl: 18,       // Números pequeños
+  '2xl': 24,    // Números (Roboto Mono)
+  '3xl': 28,    // Títulos principales
+  '4xl': 32,    // Números grandes
 };
 
 /**
@@ -108,12 +107,14 @@ export const SPACING = {
 };
 
 /**
- * Border radius
+ * Border radius - Especificaciones corporativas Díaz Lara
  */
 export const BORDER_RADIUS = {
-  sm: 8,
-  md: 10,
-  lg: 12,
-  xl: 16,
+  sm: 6,        // Badge
+  md: 8,
+  lg: 12,       // Botones, inputs
+  xl: 16,       // Cards
+  xxl: 20,
+  frame: 40,    // Frame principal
   full: 9999,
 };
