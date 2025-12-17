@@ -26,6 +26,8 @@ import AdvancedResultsCard from '@/components/calculator/AdvancedResultsCard';
 import { REGIMES } from '@/constants/Regimes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const HEADER_BG = '#000000';
+
 export default function Advanced() {
   const navigation = useNavigation();
   const { isDarkMode, theme, toggleTheme } = useTheme();
@@ -73,32 +75,33 @@ export default function Advanced() {
       tabBarActiveTintColor: activeColor,
       tabBarInactiveTintColor: inactiveColor,
     });
-  }, [navigation, theme]);
+  }, [navigation, theme, isDarkMode]);
 
   const currentRegime = REGIMES.find((r) => r.id === selectedRegime);
   const showCharacteristics = currentRegime && currentRegime.id !== 'TABLES';
   const totals = getTotals();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle={theme.statusBar as any} backgroundColor={theme.background} />
+    <SafeAreaView style={[styles.container, { backgroundColor: HEADER_BG }]}>
+      <StatusBar barStyle={theme.statusBar as any} backgroundColor={HEADER_BG} />
       
-      {/* Header fijo */}
-      <View style={styles.headerContainer}>
-        <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
-      </View>
+      <View style={[styles.page, { backgroundColor: theme.background }]}>
+        {/* Header fijo */}
+        <View style={styles.headerContainer}>
+          <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+        </View>
 
-      {/* Contenido con scroll */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+        {/* Contenido con scroll */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
         >
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
           <Animated.View style={{ opacity: fadeAnim }}>
             {/* Info Badge */}
             <View style={[styles.infoBadge, { backgroundColor: theme.accentBg + '20', borderColor: theme.accentLight }]}>
@@ -472,14 +475,18 @@ export default function Advanced() {
               <AdvancedResultsCard result={result} regime={selectedRegime} theme={theme} />
             )}
           </Animated.View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  page: {
     flex: 1,
   },
   headerContainer: {

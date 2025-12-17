@@ -2,7 +2,7 @@
 // Calculadora Simple con Splash Screen y espacio correcto debajo del Header
 
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Platform, View, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { Header } from '@/components/layout/Header';
@@ -16,6 +16,8 @@ import { AllTaxTables } from '@/components/calculator/AllTaxTables';
 import { useTheme } from '@/hooks/useTheme';
 import { useCalculator } from '@/hooks/useCalculator';
 import { REGIMES } from '@/constants/Regimes';
+
+const HEADER_BG = '#000000';
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
@@ -58,7 +60,7 @@ export default function Index() {
       tabBarActiveTintColor: activeColor,
       tabBarInactiveTintColor: inactiveColor,
     });
-  }, [navigation, showSplash, theme]);
+  }, [navigation, showSplash, theme, isDarkMode]);
 
   // Mostrar Splash Screen
   if (showSplash) {
@@ -69,16 +71,18 @@ export default function Index() {
   const isTableView = selectedRegime === 'TABLES';
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
-      <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
-      
-      {/* Contenido con espacio debajo del header */}
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView style={[styles.container, { backgroundColor: HEADER_BG }]}>
+      <StatusBar barStyle={theme.statusBar as any} backgroundColor={HEADER_BG} />
+      <View style={[styles.page, { backgroundColor: theme.background }]}>
+        {/* Header */}
+        <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+        
+        {/* Contenido con espacio debajo del header */}
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Selector de régimen - SIEMPRE VISIBLE */}
         <RegimeSelector
           selectedRegime={selectedRegime}
@@ -144,13 +148,17 @@ export default function Index() {
            
           </>
         )}
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  page: {
     flex: 1,
   },
   scrollView: {
