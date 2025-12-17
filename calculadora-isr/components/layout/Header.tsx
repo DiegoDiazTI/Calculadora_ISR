@@ -2,7 +2,7 @@
 // Header full width en cualquier plataforma, con fondo oscuro fijo
 
 import React from 'react';
-import { View, StyleSheet, Platform, Image, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Platform, Image, SafeAreaView, StatusBar } from 'react-native';
 import { ThemeColors } from '@/types';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { DARK_THEME } from '@/constants/Theme';
@@ -21,8 +21,11 @@ export const Header: React.FC<HeaderProps> = ({
   isDarkMode,
   onToggleTheme,
 }) => {
+  // En Android SafeAreaView no agrega el alto de la barra de estado; lo aplicamos manualmente
+  const topInset = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: HEADER_BG }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: HEADER_BG, paddingTop: topInset }]}>
       <View style={styles.headerContainer}>
         {/* Logo */}
         {Platform.OS === 'web' ? (

@@ -1,5 +1,5 @@
 // components/layout/SplashScreen.tsx
-// Splash Screen estilo "HTML mock": claro, corporativo, elegante.
+// Splash Screen exacto del mockup HTML - Fondo claro con decoraciones
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
@@ -10,12 +10,9 @@ import {
   Dimensions,
   TouchableOpacity,
   Image,
-  Platform,
-  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as NavigationBar from 'expo-navigation-bar';
 
 const { width } = Dimensions.get('window');
 
@@ -23,30 +20,72 @@ interface SplashScreenProps {
   onFinish: () => void;
 }
 
-const TIPS_FISCALES = [
-  "Verifica que tu RFC esté actualizado en el SAT antes de realizar cualquier trámite fiscal.",
-  "Asegúrate de conocer en qué régimen fiscal estás tributando, esto define tus obligaciones.",
-  "Revisa todos tus ingresos del período, no solo tu sueldo base.",
-  "No olvides considerar tu aguinaldo, prima vacacional y cualquier bono que hayas recibido.",
-  "Guarda tus facturas médicas, pueden ayudarte a reducir significativamente tu ISR.",
-  "Considera deducir gastos de colegiaturas (si aplica), es un beneficio fiscal importante.",
-  "Revisa si puedes deducir intereses reales de tu crédito hipotecario.",
-  "Las aportaciones voluntarias a tu Afore son deducibles y mejoran tu retiro.",
-  "Asegúrate de que tus donativos sean a instituciones autorizadas por el SAT.",
-  "No esperes al último momento: la declaración anual vence en abril.",
-];
-
-const CATEGORIES = [
-  "Verificación",
-  "Verificación",
-  "Ingresos",
-  "Ingresos",
-  "Deducciones",
-  "Deducciones",
-  "Deducciones",
-  "Deducciones",
-  "Deducciones",
-  "Consejo",
+// Frases fiscales (del HTML)
+const FRASES_FISCALES = [
+  {
+    texto: "Verifica que tu <strong>RFC</strong> esté actualizado en el SAT antes de realizar cualquier trámite fiscal.",
+    categoria: "Verificación"
+  },
+  {
+    texto: "Asegúrate de conocer en qué <strong>régimen fiscal</strong> estás tributando, esto define tus obligaciones.",
+    categoria: "Verificación"
+  },
+  {
+    texto: "Revisa todos tus <strong>ingresos del período</strong>, no solo tu sueldo base.",
+    categoria: "Ingresos"
+  },
+  {
+    texto: "No olvides considerar tu <strong>aguinaldo, prima vacacional</strong> y cualquier bono que hayas recibido.",
+    categoria: "Ingresos"
+  },
+  {
+    texto: "Guarda tus <strong>facturas médicas</strong>, pueden ayudarte a reducir significativamente tu ISR.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Considera deducir tus gastos de <strong>colegiaturas</strong> de tus hijos, es un beneficio fiscal importante.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Revisa si puedes deducir los <strong>intereses reales</strong> de tu crédito hipotecario.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Las <strong>aportaciones voluntarias</strong> a tu Afore son deducibles y mejoran tu retiro.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Las primas de tu <strong>seguro de gastos médicos mayores</strong> también cuentan como deducción.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Asegúrate de que tus <strong>donativos</strong> sean a instituciones autorizadas por el SAT.",
+    categoria: "Deducciones"
+  },
+  {
+    texto: "Revisa cuánto <strong>ISR te retuvo tu patrón</strong> durante el año en tus recibos de nómina.",
+    categoria: "Cálculo"
+  },
+  {
+    texto: "Consulta la <strong>tabla del ISR vigente</strong> según tu nivel de ingresos para calcular correctamente.",
+    categoria: "Cálculo"
+  },
+  {
+    texto: "Tus deducciones no pueden superar <strong>5 UMAs anuales</strong> o el <strong>15%</strong> de tu ingreso.",
+    categoria: "Cálculo"
+  },
+  {
+    texto: "Parte de tu <strong>aguinaldo y prima vacacional</strong> están exentos de ISR, aprovéchalo.",
+    categoria: "Cálculo"
+  },
+  {
+    texto: "No esperes hasta el último momento, tu <strong>declaración anual vence en abril</strong>.",
+    categoria: "Consejo"
+  },
+  {
+    texto: "Si tienes dudas, busca <strong>asesoría profesional</strong> para evitar errores costosos.",
+    categoria: "Consejo"
+  }
 ];
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
@@ -55,7 +94,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const floatAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // Float del logo
+  // Animación de float para el logo
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -71,178 +110,185 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         }),
       ])
     ).start();
-  }, [floatAnim]);
+  }, []);
 
-  // Rotación tips
+  // Rotación de tips cada 8 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 220,
+        duration: 300,
         useNativeDriver: true,
       }).start(() => {
-        setCurrentTipIndex((prev) => (prev + 1) % TIPS_FISCALES.length);
+        setCurrentTipIndex((prev) => (prev + 1) % FRASES_FISCALES.length);
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 220,
+          duration: 300,
           useNativeDriver: true,
         }).start();
       });
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [fadeAnim]);
+  }, []);
 
   const handlePress = () => {
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.98,
-        duration: 90,
+        duration: 100,
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnim, {
         toValue: 1,
-        duration: 90,
+        duration: 100,
         useNativeDriver: true,
       }),
-    ]).start(() => onFinish());
+    ]).start(() => {
+      onFinish();
+    });
   };
 
+  // Convertir HTML a texto plano (quitar <strong> tags)
+  const cleanText = (htmlText: string) => {
+    return htmlText.replace(/<strong>/g, '').replace(/<\/strong>/g, '');
+  };
+
+  const currentFrase = FRASES_FISCALES[currentTipIndex];
+
   return (
-    <View style={styles.container}>
-      {/* Status bar para fondo claro */}
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={styles.container.backgroundColor as string}
-      />
+    <LinearGradient
+      colors={['#f8f7f4', '#ffffff']}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+    >
+      {/* Decoraciones de fondo con blur */}
+      <View style={[styles.blurCircle, styles.blurCircleTeal1]} />
+      <View style={[styles.blurCircle, styles.blurCircleRed]} />
+      <View style={[styles.blurCircle, styles.blurCircleTeal2]} />
 
-      {/* Background decorations (simula blur) */}
-      <View style={[styles.bgCircle, styles.bgCircleOne]} />
-      <View style={[styles.bgCircle, styles.bgCircleTwo]} />
-      <View style={[styles.bgCircle, styles.bgCircleThree]} />
-
-      {/* Logo */}
-      <Animated.View style={[styles.logoSection, { transform: [{ translateY: floatAnim }] }]}>
-        <LinearGradient
-          colors={['#004a4a', '#0a2127']}
-          style={styles.logoContainer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+      {/* Contenido */}
+      <View style={styles.content}>
+        {/* Logo Section */}
+        <Animated.View 
+          style={[
+            styles.logoSection,
+            { transform: [{ translateY: floatAnim }] }
+          ]}
         >
-          <Image
-            source={require('@/assets/images/icon.png')}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
-        </LinearGradient>
-        <View pointerEvents="none" style={styles.logoGlowBorder} />
-      </Animated.View>
+          <View style={styles.logoWrapper}>
+            <LinearGradient
+              colors={['#004a4a', '#0a2127']}
+              style={styles.logoContainer}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Image
+                source={require('@/assets/images/icon.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </LinearGradient>
+          </View>
+          
+          <Text style={styles.appTitle}>Calculadora ISR</Text>
+          <Text style={styles.appSubtitle}>Tu herramienta fiscal inteligente</Text>
+        </Animated.View>
 
-      {/* Títulos */}
-      <View style={styles.titleSection}>
-        <Text style={styles.title}>Calculadora ISR</Text>
-        <Text style={styles.subtitle}>Tu herramienta fiscal inteligente</Text>
-      </View>
+        {/* Fact Section */}
+        <Animated.View style={[styles.factSection, { opacity: fadeAnim }]}>
+          <View style={styles.factCard}>
+            <View style={styles.factBorder} />
+            <View style={styles.factLabel}>
+              <MaterialCommunityIcons name="lightbulb-on" size={14} color="#004a4a" />
+              <Text style={styles.factLabelText}>{currentFrase.categoria}</Text>
+            </View>
+            <Text style={styles.factText}>
+              {cleanText(currentFrase.texto)}
+            </Text>
+          </View>
+        </Animated.View>
 
-      {/* Tip Card */}
-      <Animated.View style={[styles.tipCard, { opacity: fadeAnim }]}>
-        {/* Barra superior degradada */}
-        <LinearGradient
-          colors={['#004a4a', '#780109']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.tipTopBar}
-        />
-
-        <View style={styles.tipLabelRow}>
-          <MaterialCommunityIcons name="lightbulb-on-outline" size={16} color="#004a4a" />
-          <Text style={styles.tipLabel}>
-            {CATEGORIES[currentTipIndex] ?? 'Tip Fiscal'}
-          </Text>
+        {/* CTA Section */}
+        <View style={styles.ctaSection}>
+          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <TouchableOpacity
+              onPress={handlePress}
+              activeOpacity={0.9}
+            >
+              <LinearGradient
+                colors={['#004a4a', '#0a2127']}
+                style={styles.ctaButton}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.ctaButtonText}>Comenzar</Text>
+                <MaterialCommunityIcons name="arrow-right" size={22} color="#FFFFFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+          
+          <Text style={styles.versionText}>Versión 1.0 • Díaz Lara</Text>
+          
+          {/* Bottom indicator (iPhone home indicator) */}
         </View>
-
-        <Text style={styles.tipText}>
-          {TIPS_FISCALES[currentTipIndex]}
-        </Text>
-
-        <Text style={styles.tipSource}>Consejo informativo • Revisa tus obligaciones</Text>
-      </Animated.View>
-
-      {/* CTA */}
-      <Animated.View style={[styles.buttonWrap, { transform: [{ scale: scaleAnim }] }]}>
-        <TouchableOpacity onPress={handlePress} activeOpacity={0.9} style={styles.buttonTouchable}>
-          <LinearGradient
-            colors={['#004a4a', '#0a2127']}
-            style={styles.buttonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Text style={styles.buttonText}>COMENZAR</Text>
-            <MaterialCommunityIcons name="arrow-right" size={22} color="#FFFFFF" />
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
-
-      {/* Footer */}
-      <Text style={styles.footer}>Versión 1.1.0 • Díaz Lara</Text>
-
-      {/* Indicador inferior (iPhone style) */}
-      <View style={styles.bottomIndicator} />
-    </View>
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Similar a "cream -> white"
-    backgroundColor: '#F8F7F4',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 24,
   },
-
-  // Background circles (blur sim)
-  bgCircle: {
+  
+  // Decoraciones de fondo
+  blurCircle: {
     position: 'absolute',
-    borderRadius: 999,
-    opacity: 0.1,
-    ...(Platform.OS === 'web'
-      ? ({ filter: 'blur(60px)' } as any)
-      : null),
+    borderRadius: 9999,
   },
-  bgCircleOne: {
-    width: 420,
-    height: 420,
+  blurCircleTeal1: {
+    width: 400,
+    height: 400,
     backgroundColor: '#004a4a',
-    top: -220,
-    right: -170,
+    top: -200,
+    right: -150,
     opacity: 0.12,
   },
-  bgCircleTwo: {
-    width: 320,
-    height: 320,
+  blurCircleRed: {
+    width: 300,
+    height: 300,
     backgroundColor: '#780109',
-    bottom: -120,
-    left: -120,
+    bottom: -100,
+    left: -100,
     opacity: 0.08,
   },
-  bgCircleThree: {
-    width: 220,
-    height: 220,
+  blurCircleTeal2: {
+    width: 200,
+    height: 200,
     backgroundColor: '#004a4a',
-    bottom: 220,
-    right: -80,
+    bottom: 200,
+    right: -50,
     opacity: 0.06,
   },
-
-  // Logo
+  
+  // Content
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: 100,
+    paddingBottom: 30,
+    paddingHorizontal: 10,
+  },
+  
+  // Logo Section
   logoSection: {
-    marginBottom: 18,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 40,
+  },
+  logoWrapper: {
+    marginBottom: 28,
   },
   logoContainer: {
     width: 120,
@@ -251,142 +297,115 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#004a4a',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.22,
-    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.4,
+    shadowRadius: 60,
     elevation: 10,
   },
-  logoGlowBorder: {
-    position: 'absolute',
-    width: 128,
-    height: 128,
-    borderRadius: 35,
-    borderWidth: 3,
-    borderColor: 'rgba(0, 74, 74, 0.12)',
-  },
   logoImage: {
-    width: 66,
-    height: 66,
+    width: 70,
+    height: 70,
   },
-
-  // Titles
-  titleSection: {
-    alignItems: 'center',
-    marginBottom: 26,
-  },
-  title: {
+  appTitle: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#231F20',
+    color: '#231f20',
     textAlign: 'center',
+    marginBottom: 8,
     letterSpacing: -0.5,
-    marginBottom: 6,
   },
-  subtitle: {
+  appSubtitle: {
     fontSize: 15,
-    fontWeight: '400',
-    color: '#4C4545',
+    color: '#4c4545',
     textAlign: 'center',
+    fontWeight: '400',
   },
-
-  // Tip card (white card with border + top gradient bar)
-  tipCard: {
-    width: Math.min(width - 40, 360),
+  
+  // Fact Section
+  factSection: {
+    paddingHorizontal: 10,
+  },
+  factCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 22,
-    marginBottom: 26,
     borderWidth: 1,
-    borderColor: 'rgba(0, 74, 74, 0.10)',
+    borderColor: 'rgba(0, 74, 74, 0.1)',
+    borderRadius: 20,
+    padding: 24,
     shadowColor: '#004a4a',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
     elevation: 3,
-    overflow: 'hidden',
+    position: 'relative',
   },
-  tipTopBar: {
+  factBorder: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: 4,
+    backgroundColor: '#004a4a',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  tipLabelRow: {
+  factLabel: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     marginBottom: 12,
   },
-  tipLabel: {
+  factLabelText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#004a4a',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
   },
-  tipText: {
+  factText: {
     fontSize: 16,
-    lineHeight: 24,
-    color: '#2C2627',
-    textAlign: 'center',
-    marginBottom: 12,
+    lineHeight: 25,
+    color: '#2c2627',
+    fontWeight: '400',
   },
-  tipSource: {
-    fontSize: 12,
-    color: '#4C4545',
-    textAlign: 'center',
-    fontStyle: 'italic',
-    opacity: 0.85,
+  
+  // CTA Section
+  ctaSection: {
+    gap: 16,
   },
-
-  // CTA
-  buttonWrap: {
-    width: '100%',
-    maxWidth: 360,
-    marginBottom: 14,
-  },
-  buttonTouchable: {
-    width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  buttonGradient: {
-    width: '100%',
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
+  ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    borderRadius: 16,
     gap: 12,
     shadowColor: '#004a4a',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
-    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
     elevation: 8,
   },
-  buttonText: {
+  ctaButtonText: {
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-
-  // Footer
-  footer: {
-    fontSize: 12,
-    color: '#4C4545',
+  versionText: {
     textAlign: 'center',
+    fontSize: 12,
+    color: '#4c4545',
     opacity: 0.7,
   },
-
   bottomIndicator: {
     width: 134,
     height: 5,
+    backgroundColor: '#2c2627',
     borderRadius: 100,
-    backgroundColor: '#2C2627',
-    opacity: 0.18,
-    marginTop: 14,
+    marginTop: 16,
+    alignSelf: 'center',
+    opacity: 0.2,
   },
 });

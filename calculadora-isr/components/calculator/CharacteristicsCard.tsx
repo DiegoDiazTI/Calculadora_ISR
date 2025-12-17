@@ -16,10 +16,10 @@ export const CharacteristicsCard: React.FC<CharacteristicsCardProps> = ({
   title,
   characteristics,
   theme,
-}) => {
+  }) => {
   return (
     <View style={[styles.card, { backgroundColor: theme.characteristicsCard }]}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: theme.characteristicsText }]}>{title}</Text>
       {characteristics.map((characteristic, index) => (
         <View key={index} style={styles.row}>
           <MaterialCommunityIcons
@@ -45,7 +45,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
   row: {

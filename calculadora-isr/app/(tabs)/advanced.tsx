@@ -13,6 +13,7 @@ import {
   View,
   Text,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAdvancedCalculator } from '@/hooks/useAdvancedCalculator';
 import { Header } from '@/components/layout/Header';
@@ -26,6 +27,7 @@ import { REGIMES } from '@/constants/Regimes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Advanced() {
+  const navigation = useNavigation();
   const { isDarkMode, theme, toggleTheme } = useTheme();
   const {
     selectedRegime,
@@ -51,6 +53,27 @@ export default function Advanced() {
       useNativeDriver: true,
     }).start();
   }, []);
+
+  // Sincronizar colores de la Tab Bar con el modo actual
+  useEffect(() => {
+    const baseTabBarStyle = {
+      backgroundColor: theme.cardBackground,
+      borderTopColor: theme.border,
+      borderTopWidth: 1,
+      paddingBottom: Platform.OS === 'ios' ? 20 : 5,
+      paddingTop: 5,
+      height: Platform.OS === 'ios' ? 85 : 60,
+    };
+
+    const activeColor = isDarkMode ? '#FFFFFF' : theme.accent;
+    const inactiveColor = isDarkMode ? '#E2E8F0' : theme.textSecondary;
+
+    navigation.setOptions({
+      tabBarStyle: baseTabBarStyle,
+      tabBarActiveTintColor: activeColor,
+      tabBarInactiveTintColor: inactiveColor,
+    });
+  }, [navigation, theme]);
 
   const currentRegime = REGIMES.find((r) => r.id === selectedRegime);
   const showCharacteristics = currentRegime && currentRegime.id !== 'TABLES';

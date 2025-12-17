@@ -1,5 +1,5 @@
 // components/calculator/AllTaxTables.tsx
-// Componente con todas las tablas de ISR (incluyendo 12 meses de Actividad Empresarial)
+// Componente con todas las tablas de ISR - TABS RESPONSIVOS AL TEMA
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
@@ -20,9 +20,21 @@ const MESES = [
 
 export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
   const [selectedTable, setSelectedTable] = useState<TableType>('RESICO');
-  const [selectedMonth, setSelectedMonth] = useState<number>(0); // 0 = enero
+  const [selectedMonth, setSelectedMonth] = useState<number>(0);
 
-  // Generar tabla para un mes específico multiplicando los límites
+  // Detectar si es modo oscuro (alineado con los temas definidos)
+  const isDarkMode = theme.statusBar === 'light-content' || theme.background === '#000000';
+
+  // Colores dinámicos según el tema
+  const tabColors = {
+    containerBg: isDarkMode ? '#0F172A' : '#FFFFFF',
+    inactiveBg: isDarkMode ? '#1E293B' : '#FFFFFF',
+    inactiveBorder: isDarkMode ? '#334155' : '#E2E8F0',
+    inactiveText: isDarkMode ? theme.textSecondary : '#0F172A',
+    activeBg: theme.accent,
+    activeText: '#FFFFFF',
+  };
+
   const getTablaParaMes = (mesNumero: number) => {
     return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map(bracket => ({
       ...bracket,
@@ -34,18 +46,21 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
 
   return (
     <View style={styles.container}>
-      {/* Selector de tabla */}
-      <View style={styles.tabContainer}>
+      {/* Selector de tabla con estilos dinámicos */}
+      <View style={[styles.tabContainer, { backgroundColor: tabColors.containerBg }]}>
         <TouchableOpacity
           style={[
             styles.tab,
-            selectedTable === 'RESICO' && { ...styles.tabActive, backgroundColor: theme.accent }
+            { 
+              backgroundColor: selectedTable === 'RESICO' ? tabColors.activeBg : tabColors.inactiveBg,
+              borderColor: selectedTable === 'RESICO' ? tabColors.activeBg : tabColors.inactiveBorder,
+            }
           ]}
           onPress={() => setSelectedTable('RESICO')}
         >
           <Text style={[
             styles.tabText,
-            { color: selectedTable === 'RESICO' ? '#FFFFFF' : theme.textSecondary }
+            { color: selectedTable === 'RESICO' ? tabColors.activeText : tabColors.inactiveText }
           ]}>
             RESICO
           </Text>
@@ -54,13 +69,16 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
         <TouchableOpacity
           style={[
             styles.tab,
-            selectedTable === 'EMPRESARIAL' && { ...styles.tabActive, backgroundColor: theme.accent }
+            { 
+              backgroundColor: selectedTable === 'EMPRESARIAL' ? tabColors.activeBg : tabColors.inactiveBg,
+              borderColor: selectedTable === 'EMPRESARIAL' ? tabColors.activeBg : tabColors.inactiveBorder,
+            }
           ]}
           onPress={() => setSelectedTable('EMPRESARIAL')}
         >
           <Text style={[
             styles.tabText,
-            { color: selectedTable === 'EMPRESARIAL' ? '#FFFFFF' : theme.textSecondary }
+            { color: selectedTable === 'EMPRESARIAL' ? tabColors.activeText : tabColors.inactiveText }
           ]}>
             Empresarial
           </Text>
@@ -69,13 +87,16 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
         <TouchableOpacity
           style={[
             styles.tab,
-            selectedTable === 'MORAL' && { ...styles.tabActive, backgroundColor: theme.accent }
+            { 
+              backgroundColor: selectedTable === 'MORAL' ? tabColors.activeBg : tabColors.inactiveBg,
+              borderColor: selectedTable === 'MORAL' ? tabColors.activeBg : tabColors.inactiveBorder,
+            }
           ]}
           onPress={() => setSelectedTable('MORAL')}
         >
           <Text style={[
             styles.tabText,
-            { color: selectedTable === 'MORAL' ? '#FFFFFF' : theme.textSecondary }
+            { color: selectedTable === 'MORAL' ? tabColors.activeText : tabColors.inactiveText }
           ]}>
             Moral
           </Text>
@@ -155,7 +176,6 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
               </Text>
             </View>
 
-            {/* Selector de mes */}
             <View style={styles.monthSelectorContainer}>
               <Text style={[styles.monthSelectorLabel, { color: theme.text }]}>
                 Selecciona el mes:
@@ -189,14 +209,12 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
               </ScrollView>
             </View>
 
-            {/* Título del mes seleccionado */}
             <View style={[styles.selectedMonthBanner, { backgroundColor: theme.accent }]}>
               <Text style={styles.selectedMonthText}>
                 {MESES[selectedMonth]} (Mes {selectedMonth + 1})
               </Text>
             </View>
 
-            {/* Encabezados de la tabla */}
             <View style={styles.tableHeaderRow}>
               <View style={styles.tableCol1}>
                 <Text style={[styles.headerTextSmall, { color: theme.textTertiary }]}>
@@ -220,7 +238,6 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
               </View>
             </View>
 
-            {/* Filas de datos */}
             {getTablaParaMes(selectedMonth + 1).map((bracket, index) => (
               <View key={index} style={[styles.tableDataRow, { borderBottomColor: theme.border }]}>
                 <View style={styles.tableCol1}>
@@ -317,7 +334,6 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
         </View>
       )}
 
-      {/* Footer informativo */}
       <View style={[styles.footer, { backgroundColor: theme.detailCard }]}>
         <MaterialCommunityIcons name="information-outline" size={16} color={theme.textSecondary} />
         <Text style={[styles.footerText, { color: theme.textSecondary }]}>
@@ -335,17 +351,17 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     marginBottom: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: 'hidden',
+    padding: 4,
+    gap: 4,
   },
   tab: {
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-  },
-  tabActive: {
-    borderBottomWidth: 3,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   tabText: {
     fontSize: 13,

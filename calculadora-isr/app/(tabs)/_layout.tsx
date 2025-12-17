@@ -1,19 +1,25 @@
 // app/(tabs)/_layout.tsx
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { DARK_THEME, LIGHT_THEME } from '@/constants/Theme';
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? DARK_THEME : LIGHT_THEME;
+  const activeColor = colorScheme === 'dark' ? '#FFFFFF' : theme.accent;
+  const inactiveColor = colorScheme === 'dark' ? '#E2E8F0' : theme.textSecondary;
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#14B8A6',
-        tabBarInactiveTintColor: '#64748B',
+        tabBarActiveTintColor: activeColor,
+        tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#1E293B',
-          borderTopColor: '#334155',
+          backgroundColor: theme.cardBackground,
+          borderTopColor: theme.border,
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'ios' ? 20 : 5,
           paddingTop: 5,
