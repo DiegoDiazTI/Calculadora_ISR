@@ -2,7 +2,7 @@
 // Calculadora Simple con Splash Screen y espacio correcto debajo del Header
 
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Platform, View, StatusBar } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Platform, View, StatusBar, KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { Header } from '@/components/layout/Header';
@@ -18,6 +18,7 @@ import { useCalculator } from '@/hooks/useCalculator';
 import { REGIMES } from '@/constants/Regimes';
 
 const HEADER_BG = '#000000';
+const KEYBOARD_VERTICAL_OFFSET = Platform.OS === 'ios' ? 60 : 0;
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
@@ -78,11 +79,17 @@ export default function Index() {
         <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
         
         {/* Contenido con espacio debajo del header */}
-        <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={KEYBOARD_VERTICAL_OFFSET}
         >
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
         {/* Selector de régimen - SIEMPRE VISIBLE */}
         <RegimeSelector
           selectedRegime={selectedRegime}
@@ -144,11 +151,12 @@ export default function Index() {
                 />
               </>
             )}
-
+            
            
           </>
         )}
-        </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
@@ -159,6 +167,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   page: {
+    flex: 1,
+  },
+  keyboardView: {
     flex: 1,
   },
   scrollView: {

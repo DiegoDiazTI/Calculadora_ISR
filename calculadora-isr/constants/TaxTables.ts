@@ -21,6 +21,18 @@ export const RESICO_TAX_TABLE_2025: TaxBracket[] = [
 ];
 
 /**
+ * Tabla ANUAL de tasas RESICO 2025
+ * Tasas oficiales sobre ingresos acumulados del ejercicio
+ */
+export const RESICO_TAX_TABLE_ANUAL_2025: TaxBracket[] = [
+  { min: 0, max: 300000, rate: 0.01 },            // 1.0%
+  { min: 300000.01, max: 600000, rate: 0.0110 },  // 1.10%
+  { min: 600000.01, max: 1000000, rate: 0.0150 }, // 1.50%
+  { min: 1000000.01, max: 2000000, rate: 0.0200 }, // 2.0%
+  { min: 2000000.01, max: 3500000, rate: 0.0250 }, // 2.5%
+];
+
+/**
  * Límite máximo de ingresos anuales para RESICO
  */
 export const RESICO_MAX_INCOME = 3500000;

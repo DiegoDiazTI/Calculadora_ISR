@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemeColors } from '@/types';
-import { RESICO_TAX_TABLE_2025, ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025, PERSONA_MORAL_RATE } from '@/constants/TaxTables';
+import { RESICO_TAX_TABLE_2025, RESICO_TAX_TABLE_ANUAL_2025, ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025, PERSONA_MORAL_RATE } from '@/constants/TaxTables';
 
 interface AllTaxTablesProps {
   theme: ThemeColors;
@@ -21,11 +21,12 @@ const MESES = [
 export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
   const [selectedTable, setSelectedTable] = useState<TableType>('RESICO');
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
+  const [resicoPeriod, setResicoPeriod] = useState<'MENSUAL' | 'ANUAL'>('MENSUAL');
 
   // Detectar si es modo oscuro (alineado con los temas definidos)
   const isDarkMode = theme.statusBar === 'light-content' || theme.background === '#000000';
 
-  // Colores dinámicos según el tema
+  // Colores dinamicos segun el tema
   const tabColors = {
     containerBg: isDarkMode ? '#0F172A' : '#FFFFFF',
     inactiveBg: isDarkMode ? '#1E293B' : '#FFFFFF',
@@ -44,9 +45,13 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
     }));
   };
 
+  const resicoTableData = resicoPeriod === 'MENSUAL'
+    ? RESICO_TAX_TABLE_2025
+    : RESICO_TAX_TABLE_ANUAL_2025;
+
   return (
     <View style={styles.container}>
-      {/* Selector de tabla con estilos dinámicos */}
+      {/* Selector de tabla con estilos dinamicos */}
       <View style={[styles.tabContainer, { backgroundColor: tabColors.containerBg }]}>
         <TouchableOpacity
           style={[
@@ -115,39 +120,88 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
 
           <View style={[styles.infoBox, { backgroundColor: theme.detailCard }]}>
             <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              Régimen Simplificado de Confianza para Personas Físicas
+              Regimen Simplificado de Confianza para Personas Fisicas
             </Text>
             <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              • Tabla MENSUAL de tu consultoría{'\n'}
-              • Límite: $3,500,000 anuales{'\n'}
-              • Cálculo: Ingreso × Tasa directa{'\n'}
-              • Sin deducciones personales
+              - Elige ver la tabla MENSUAL o ANUAL de referencia{'\n'}
+              - Limite: $3,500,000 anuales{'\n'}
+              - Calculo: Ingreso x tasa directa{'\n'}
+              - Sin deducciones personales
             </Text>
+          </View>
+
+          <View style={[styles.periodToggle, { backgroundColor: tabColors.containerBg }]}>
+            <TouchableOpacity
+              style={[
+                styles.periodButton,
+                {
+                  borderColor: tabColors.inactiveBorder,
+                  backgroundColor: resicoPeriod === 'MENSUAL' ? tabColors.activeBg : tabColors.inactiveBg,
+                }
+              ]}
+              onPress={() => setResicoPeriod('MENSUAL')}
+            >
+              <Text style={[
+                styles.periodButtonText,
+                { color: resicoPeriod === 'MENSUAL' ? tabColors.activeText : tabColors.inactiveText }
+              ]}>
+                Tabla mensual
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.periodButton,
+                {
+                  borderColor: tabColors.inactiveBorder,
+                  backgroundColor: resicoPeriod === 'ANUAL' ? tabColors.activeBg : tabColors.inactiveBg,
+                }
+              ]}
+              onPress={() => setResicoPeriod('ANUAL')}
+            >
+              <Text style={[
+                styles.periodButtonText,
+                { color: resicoPeriod === 'ANUAL' ? tabColors.activeText : tabColors.inactiveText }
+              ]}>
+                Tabla anual
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={[styles.headerRow, { borderBottomColor: theme.border }]}>
-            <Text style={[styles.headerText, { color: theme.textTertiary }]}>
-              LÍMITE INFERIOR
-            </Text>
-            <Text style={[styles.headerText, { color: theme.textTertiary }]}>
-              LÍMITE SUPERIOR
-            </Text>
-            <Text style={[styles.headerText, { color: theme.textTertiary }]}>
-              TASA
-            </Text>
+            <View style={styles.headerCell}>
+              <Text style={[styles.headerText, { color: theme.textTertiary }]}>
+                LIMITE INFERIOR
+              </Text>
+            </View>
+            <View style={styles.headerCell}>
+              <Text style={[styles.headerText, { color: theme.textTertiary }]}>
+                LIMITE SUPERIOR
+              </Text>
+            </View>
+            <View style={styles.headerCell}>
+              <Text style={[styles.headerText, { color: theme.textTertiary }]}>
+                TASA
+              </Text>
+            </View>
           </View>
 
-          {RESICO_TAX_TABLE_2025.map((bracket, index) => (
+          {resicoTableData.map((bracket, index) => (
             <View key={index} style={styles.dataRow}>
-              <Text style={[styles.dataText, { color: theme.textSecondary }]}>
-                ${bracket.min.toLocaleString()}
-              </Text>
-              <Text style={[styles.dataText, { color: theme.textSecondary }]}>
-                ${bracket.max.toLocaleString()}
-              </Text>
-              <Text style={[styles.dataRate, { color: theme.accentLight }]}>
-                {(bracket.rate * 100).toFixed(2)}%
-              </Text>
+              <View style={styles.dataCell}>
+                <Text style={[styles.dataText, { color: theme.textSecondary }]}>
+                  ${bracket.min.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.dataCell}>
+                <Text style={[styles.dataText, { color: theme.textSecondary }]}>
+                  ${bracket.max.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.dataCell}>
+                <Text style={[styles.dataRate, { color: theme.accentLight }]}>
+                  {(bracket.rate * 100).toFixed(2)}%
+                </Text>
+              </View>
             </View>
           ))}
         </View>
@@ -166,13 +220,13 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
 
             <View style={[styles.infoBox, { backgroundColor: theme.detailCard }]}>
               <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                Personas Físicas con Actividad Empresarial y Profesional
+                Personas Fisicas con Actividad Empresarial y Profesional
               </Text>
               <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                • Tablas acumulativas por mes{'\n'}
-                • Cálculo: Cuota Fija + (Excedente × Tasa){'\n'}
-                • Permite deducciones autorizadas{'\n'}
-                • Sistema progresivo (1.92% - 35%)
+                - Tablas acumulativas por mes{'\n'}
+                - Calculo: Cuota fija + (Excedente x tasa){'\n'}
+                - Permite deducciones autorizadas{'\n'}
+                - Sistema progresivo (1.92% - 35%)
               </Text>
             </View>
 
@@ -218,12 +272,12 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
             <View style={styles.tableHeaderRow}>
               <View style={styles.tableCol1}>
                 <Text style={[styles.headerTextSmall, { color: theme.textTertiary }]}>
-                  LÍMITE INF.
+                  LIMITE INF.
                 </Text>
               </View>
               <View style={styles.tableCol2}>
                 <Text style={[styles.headerTextSmall, { color: theme.textTertiary }]}>
-                  LÍMITE SUP.
+                  LIMITE SUP.
                 </Text>
               </View>
               <View style={styles.tableCol3}>
@@ -278,13 +332,13 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
 
           <View style={[styles.infoBox, { backgroundColor: theme.detailCard }]}>
             <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              Régimen General para Personas Morales (Empresas)
+              Regimen General para Personas Morales (Empresas)
             </Text>
             <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-              • Tasa fija del 30%{'\n'}
-              • Cálculo: Utilidad Fiscal × 30%{'\n'}
-              • Permite deducciones completas{'\n'}
-              • Aplica para sociedades y corporaciones
+              - Tasa fija del 30%{'\n'}
+              - Calculo: Utilidad fiscal x 30%{'\n'}
+              - Permite deducciones completas{'\n'}
+              - Aplica para sociedades y corporaciones
             </Text>
           </View>
 
@@ -292,12 +346,12 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
             <Text style={styles.moralRateLabel}>TASA GENERAL</Text>
             <Text style={styles.moralRateValue}>{(PERSONA_MORAL_RATE * 100)}%</Text>
             <Text style={styles.moralRateDescription}>
-              Sobre utilidad fiscal después de deducciones
+              Sobre utilidad fiscal despues de deducciones
             </Text>
           </View>
 
           <View style={[styles.exampleCard, { backgroundColor: theme.detailCard }]}>
-            <Text style={[styles.exampleTitle, { color: theme.text }]}>Ejemplo de Cálculo:</Text>
+            <Text style={[styles.exampleTitle, { color: theme.text }]}>Ejemplo de Calculo:</Text>
             <View style={styles.exampleRow}>
               <Text style={[styles.exampleLabel, { color: theme.textSecondary }]}>
                 Ingresos acumulables:
@@ -324,7 +378,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
             </View>
             <View style={styles.exampleRow}>
               <Text style={[styles.exampleLabel, { color: theme.textSecondary }]}>
-                × Tasa (30%):
+                x Tasa (30%):
               </Text>
               <Text style={[styles.exampleValue, { color: theme.accentLight, fontWeight: 'bold' }]}>
                 $354,000
@@ -336,9 +390,14 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
 
       <View style={[styles.footer, { backgroundColor: theme.detailCard }]}>
         <MaterialCommunityIcons name="information-outline" size={16} color={theme.textSecondary} />
-        <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-          Tablas vigentes para el ejercicio fiscal 2025. Consulta con tu contador para casos específicos.
-        </Text>
+        <View style={styles.footerTextContainer}>
+          <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+            Tablas vigentes para el ejercicio fiscal 2025. Consulta con tu contador para casos especificos.
+          </Text>
+          <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+            Estas tablas son meramente informativas y no sustituyen asesoramiento profesional.
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -395,6 +454,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 20,
   },
+  periodToggle: {
+    flexDirection: 'row',
+    gap: 8,
+    padding: 6,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  periodButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  periodButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
   monthSelectorContainer: {
     marginBottom: 16,
   },
@@ -431,7 +508,6 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 2,
     marginBottom: 8,
@@ -440,8 +516,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     letterSpacing: 0.5,
-    flex: 1,
     textAlign: 'center',
+  },
+  headerCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTextSmall: {
     fontSize: 9,
@@ -484,14 +564,17 @@ const styles = StyleSheet.create({
   },
   dataRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#1E293B',
   },
+  dataCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dataText: {
     fontSize: 12,
-    flex: 1,
     textAlign: 'center',
   },
   dataTextSmall: {
@@ -560,10 +643,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 8,
   },
-  footerText: {
-    fontSize: 11,
+  footerTextContainer: {
     marginLeft: 8,
     flex: 1,
+    gap: 4,
+  },
+  footerText: {
+    fontSize: 11,
     lineHeight: 16,
   },
 });
