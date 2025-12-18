@@ -1,5 +1,5 @@
 // hooks/useCalculator.ts
-// Custom hook para la lógica de la calculadora
+// CORRECTO FINAL: Persona Moral usa coeficiente para ISR anual, SIN tabla de pagos provisionales
 
 import { useState } from 'react';
 import { RegimeType, CalculationResult } from '@/types';
@@ -13,6 +13,11 @@ import { formatCurrencyInput, parseCurrency } from '@/utils/formatters';
 export const useCalculator = () => {
   const [selectedRegime, setSelectedRegime] = useState<RegimeType>('RESICO');
   const [annualIncome, setAnnualIncome] = useState('1,250,000');
+  const [deductions, setDeductions] = useState('0');
+  
+  // Estado para Persona Moral - Coeficiente de Utilidad
+  const [utilityCoefficient, setUtilityCoefficient] = useState('0.2360');
+  
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
 
@@ -26,7 +31,35 @@ export const useCalculator = () => {
     } else {
       setAnnualIncome('');
     }
-    // Ocultar resultados cuando cambia el input
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de deducciones
+   */
+  const handleDeductionsChange = (text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    if (cleaned) {
+      setDeductions(formatCurrencyInput(cleaned));
+    } else {
+      setDeductions('');
+    }
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de coeficiente de utilidad
+   */
+  const handleCoefficientChange = (text: string) => {
+    // Permitir números y punto decimal
+    const cleaned = text.replace(/[^0-9.]/g, '');
+    
+    // Validar formato de decimal (máximo 4 decimales)
+    const parts = cleaned.split('.');
+    if (parts.length > 2) return;
+    if (parts[1] && parts[1].length > 4) return;
+    
+    setUtilityCoefficient(cleaned);
     setShowResults(false);
   };
 
@@ -37,6 +70,26 @@ export const useCalculator = () => {
     setSelectedRegime(regime);
     setShowResults(false);
     setResult(null);
+    
+    // Resetear deducciones al cambiar de régimen
+    if (regime !== 'EMPRESARIAL') {
+      setDeductions('0');
+    }
+  };
+
+  /**
+   * Calcula la base gravable para Actividad Empresarial
+   */
+  const getTaxableBase = (): number => {
+    if (selectedRegime !== 'EMPRESARIAL') {
+      return parseCurrency(annualIncome);
+    }
+    
+    const income = parseCurrency(annualIncome);
+    const deduct = parseCurrency(deductions);
+    const taxableBase = income - deduct;
+    
+    return taxableBase > 0 ? taxableBase : 0;
   };
 
   /**
@@ -44,17 +97,32 @@ export const useCalculator = () => {
    */
   const calculateISR = () => {
     const income = parseCurrency(annualIncome);
+    const deduct = parseCurrency(deductions);
 
     let calculationResult: CalculationResult;
 
     if (selectedRegime === 'RESICO') {
       calculationResult = calculateResicoISR(income);
     } else if (selectedRegime === 'MORAL') {
-      calculationResult = calculateMoralISR(income);
+      // Para Persona Moral: Ingresos × Coeficiente = Utilidad Fiscal
+      const coefficient = parseFloat(utilityCoefficient || '0');
+      const utilidadFiscal = income * coefficient;
+      
+      // Luego calcular ISR sobre la utilidad fiscal
+      calculationResult = calculateMoralISR(utilidadFiscal);
     } else if (selectedRegime === 'EMPRESARIAL') {
-      // Para Actividad Empresarial en modo simple, asumimos 0 deducciones
-      // (base gravable = ingresos totales)
-      calculationResult = calculateActividadEmpresarialISR(income);
+      const taxableBase = income - deduct;
+      
+      if (taxableBase <= 0) {
+        calculationResult = {
+          tax: 0,
+          rate: 0,
+          bracket: 'Base gravable negativa o cero',
+          netIncome: 0,
+        };
+      } else {
+        calculationResult = calculateActividadEmpresarialISR(taxableBase);
+      }
     } else {
       calculationResult = {
         tax: 0,
@@ -73,6 +141,8 @@ export const useCalculator = () => {
    */
   const reset = () => {
     setAnnualIncome('');
+    setDeductions('0');
+    setUtilityCoefficient('0.2360');
     setShowResults(false);
     setResult(null);
   };
@@ -80,11 +150,16 @@ export const useCalculator = () => {
   return {
     selectedRegime,
     annualIncome,
+    deductions,
+    utilityCoefficient,
     showResults,
     result,
     handleIncomeChange,
+    handleDeductionsChange,
+    handleCoefficientChange,
     handleRegimeChange,
     calculateISR,
     reset,
+    getTaxableBase,
   };
 };

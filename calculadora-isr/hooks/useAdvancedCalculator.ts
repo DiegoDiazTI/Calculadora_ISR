@@ -1,5 +1,5 @@
 // hooks/useAdvancedCalculator.ts
-// Custom hook para la calculadora avanzada
+// ACTUALIZADO: Soporte para selección de mes en Actividad Empresarial
 
 import { useState } from 'react';
 import { RegimeType } from '@/types';
@@ -18,6 +18,7 @@ export const useAdvancedCalculator = () => {
   const [selectedRegime, setSelectedRegime] = useState<RegimeType>('RESICO');
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<AdvancedCalculationResult | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number>(11); // ← NUEVO: Diciembre por defecto (índice 11)
 
   // Estados para RESICO
   const [resicoData, setResicoData] = useState({
@@ -30,13 +31,7 @@ export const useAdvancedCalculator = () => {
   // Estados para Actividad Empresarial
   const [empresarialData, setEmpresarialData] = useState({
     totalIncome: '3,000,000',
-    purchases: '1,200,000',
-    operatingExpenses: '400,000',
-    salaries: '300,000',
-    rent: '80,000',
-    depreciation: '100,000',
-    interest: '30,000',
-    otherDeductions: '50,000',
+    totalDeductions: '2,160,000',
     provisionalPayments: '0',
     withheldISR: '0',
   });
@@ -44,15 +39,8 @@ export const useAdvancedCalculator = () => {
   // Estados para Persona Moral
   const [moralData, setMoralData] = useState({
     totalIncome: '5,000,000',
-    purchases: '2,000,000',
-    operatingExpenses: '800,000',
-    salaries: '600,000',
-    rent: '120,000',
-    depreciation: '150,000',
-    interest: '50,000',
-    otherDeductions: '100,000',
+    totalDeductions: '3,820,000',
     previousLosses: '0',
-    ptu: '0',
     provisionalPayments: '0',
     withheldISR: '0',
   });
@@ -109,6 +97,14 @@ export const useAdvancedCalculator = () => {
   };
 
   /**
+   * Maneja el cambio de mes
+   */
+  const handleMonthChange = (month: number) => {
+    setSelectedMonth(month);
+    setShowResults(false);
+  };
+
+  /**
    * Calcula el ISR según el régimen seleccionado
    */
   const calculateISR = () => {
@@ -125,29 +121,17 @@ export const useAdvancedCalculator = () => {
     } else if (selectedRegime === 'EMPRESARIAL') {
       const data: EmpresarialAdvancedData = {
         totalIncome: parseCurrency(empresarialData.totalIncome),
-        purchases: parseCurrency(empresarialData.purchases),
-        operatingExpenses: parseCurrency(empresarialData.operatingExpenses),
-        salaries: parseCurrency(empresarialData.salaries),
-        rent: parseCurrency(empresarialData.rent),
-        depreciation: parseCurrency(empresarialData.depreciation),
-        interest: parseCurrency(empresarialData.interest),
-        otherDeductions: parseCurrency(empresarialData.otherDeductions),
+        totalDeductions: parseCurrency(empresarialData.totalDeductions),
         provisionalPayments: parseCurrency(empresarialData.provisionalPayments),
         withheldISR: parseCurrency(empresarialData.withheldISR),
       };
-      calculationResult = calculateAdvancedEmpresarial(data);
+      // Pasar el mes seleccionado al cálculo
+      calculationResult = calculateAdvancedEmpresarial(data, selectedMonth + 1);
     } else if (selectedRegime === 'MORAL') {
       const data: MoralAdvancedData = {
         totalIncome: parseCurrency(moralData.totalIncome),
-        purchases: parseCurrency(moralData.purchases),
-        operatingExpenses: parseCurrency(moralData.operatingExpenses),
-        salaries: parseCurrency(moralData.salaries),
-        rent: parseCurrency(moralData.rent),
-        depreciation: parseCurrency(moralData.depreciation),
-        interest: parseCurrency(moralData.interest),
-        otherDeductions: parseCurrency(moralData.otherDeductions),
+        totalDeductions: parseCurrency(moralData.totalDeductions),
         previousLosses: parseCurrency(moralData.previousLosses),
-        ptu: parseCurrency(moralData.ptu),
         provisionalPayments: parseCurrency(moralData.provisionalPayments),
         withheldISR: parseCurrency(moralData.withheldISR),
       };
@@ -173,32 +157,20 @@ export const useAdvancedCalculator = () => {
     });
     setEmpresarialData({
       totalIncome: '',
-      purchases: '',
-      operatingExpenses: '',
-      salaries: '',
-      rent: '',
-      depreciation: '',
-      interest: '',
-      otherDeductions: '',
+      totalDeductions: '',
       provisionalPayments: '',
       withheldISR: '',
     });
     setMoralData({
       totalIncome: '',
-      purchases: '',
-      operatingExpenses: '',
-      salaries: '',
-      rent: '',
-      depreciation: '',
-      interest: '',
-      otherDeductions: '',
+      totalDeductions: '',
       previousLosses: '',
-      ptu: '',
       provisionalPayments: '',
       withheldISR: '',
     });
     setShowResults(false);
     setResult(null);
+    setSelectedMonth(11); // Reset a diciembre
   };
 
   /**
@@ -206,14 +178,7 @@ export const useAdvancedCalculator = () => {
    */
   const getTotals = () => {
     if (selectedRegime === 'EMPRESARIAL') {
-      const totalDeductions =
-        parseCurrency(empresarialData.purchases) +
-        parseCurrency(empresarialData.operatingExpenses) +
-        parseCurrency(empresarialData.salaries) +
-        parseCurrency(empresarialData.rent) +
-        parseCurrency(empresarialData.depreciation) +
-        parseCurrency(empresarialData.interest) +
-        parseCurrency(empresarialData.otherDeductions);
+      const totalDeductions = parseCurrency(empresarialData.totalDeductions);
 
       return {
         totalIncome: parseCurrency(empresarialData.totalIncome),
@@ -221,15 +186,7 @@ export const useAdvancedCalculator = () => {
         taxableBase: parseCurrency(empresarialData.totalIncome) - totalDeductions,
       };
     } else if (selectedRegime === 'MORAL') {
-      const totalDeductions =
-        parseCurrency(moralData.purchases) +
-        parseCurrency(moralData.operatingExpenses) +
-        parseCurrency(moralData.salaries) +
-        parseCurrency(moralData.rent) +
-        parseCurrency(moralData.depreciation) +
-        parseCurrency(moralData.interest) +
-        parseCurrency(moralData.otherDeductions) +
-        parseCurrency(moralData.ptu);
+      const totalDeductions = parseCurrency(moralData.totalDeductions);
 
       return {
         totalIncome: parseCurrency(moralData.totalIncome),
@@ -247,10 +204,12 @@ export const useAdvancedCalculator = () => {
     resicoData,
     empresarialData,
     moralData,
+    selectedMonth,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
     handleRegimeChange,
+    handleMonthChange,
     calculateISR,
     reset,
     getTotals,

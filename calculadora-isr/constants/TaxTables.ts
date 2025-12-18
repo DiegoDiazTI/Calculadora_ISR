@@ -88,7 +88,7 @@ export const RESICO_CHARACTERISTICS = [
   'Ingresos máximos: $3,500,000 anuales',
   'Tasas reducidas del 1% al 2.5%',
   'Cálculo directo sobre ingresos',
-  'No hay deducciones personales',
+  'No hay deducciones',
 ];
 
 /**

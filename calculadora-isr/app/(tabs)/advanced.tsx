@@ -1,27 +1,26 @@
 // app/(tabs)/advanced.tsx
-// Pantalla de Calculadora Avanzada
+// ACTUALIZADO: Selector de mes para Actividad Empresarial
 
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
-  ScrollView,
   StatusBar,
   SafeAreaView,
   Animated,
   Platform,
-  KeyboardAvoidingView,
   View,
   Text,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAdvancedCalculator } from '@/hooks/useAdvancedCalculator';
 import { Header } from '@/components/layout/Header';
 import { RegimeSelector } from '@/components/calculator/RegimeSelector';
 import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard';
+import { MonthSelector } from '@/components/calculator/MonthSelector';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { DeductionsInput } from '@/components/calculator/DeductionsInput';
 import AdvancedResultsCard from '@/components/calculator/AdvancedResultsCard';
 import { REGIMES } from '@/constants/Regimes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -38,10 +37,12 @@ export default function Advanced() {
     resicoData,
     empresarialData,
     moralData,
+    selectedMonth,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
     handleRegimeChange,
+    handleMonthChange,
     calculateISR,
     getTotals,
   } = useAdvancedCalculator();
@@ -56,7 +57,6 @@ export default function Advanced() {
     }).start();
   }, []);
 
-  // Sincronizar colores de la Tab Bar con el modo actual
   useEffect(() => {
     const baseTabBarStyle = {
       backgroundColor: theme.cardBackground,
@@ -86,24 +86,22 @@ export default function Advanced() {
       <StatusBar barStyle={theme.statusBar as any} backgroundColor={HEADER_BG} />
       
       <View style={[styles.page, { backgroundColor: theme.background }]}>
-        {/* Header fijo */}
         <View style={styles.headerContainer}>
           <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
         </View>
 
-        {/* Contenido con scroll */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
+        <KeyboardAwareScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraHeight={150}
+          extraScrollHeight={150}
+          keyboardOpeningTime={0}
         >
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
           <Animated.View style={{ opacity: fadeAnim }}>
-            {/* Info Badge */}
             <View style={[styles.infoBadge, { backgroundColor: theme.accentBg + '20', borderColor: theme.accentLight }]}>
               <MaterialCommunityIcons name="information" size={20} color={theme.accentLight} />
               <Text style={[styles.infoBadgeText, { color: theme.accentLight }]}>
@@ -111,14 +109,12 @@ export default function Advanced() {
               </Text>
             </View>
 
-            {/* Selector de régimen */}
             <RegimeSelector
               selectedRegime={selectedRegime}
               onSelectRegime={handleRegimeChange}
               theme={theme}
             />
 
-            {/* Características del régimen */}
             {showCharacteristics && currentRegime && (
               <CharacteristicsCard
                 title={
@@ -133,7 +129,7 @@ export default function Advanced() {
               />
             )}
 
-            {/* Inputs para RESICO */}
+            {/* RESICO */}
             {selectedRegime === 'RESICO' && (
               <>
                 <Input
@@ -186,29 +182,41 @@ export default function Advanced() {
                     selectionColor={theme.accentLight}
                   />
 
-                  <Input
-                    label="IVA Retenido (6%) - Opcional"
-                    prefix="$"
-                    value={resicoData.withheldIVA}
-                    onChangeText={(text) => handleResicoChange('withheldIVA', text)}
-                    keyboardType="numeric"
-                    placeholder="0"
-                    backgroundColor={theme.inputBg}
-                    borderColor={theme.inputBorder}
-                    textColor={theme.text}
-                    labelColor={theme.textSecondary}
-                    prefixColor={theme.textSecondary}
-                    selectionColor={theme.accentLight}
-                  />
+                  
                 </View>
               </>
             )}
 
-            {/* Inputs para Actividad Empresarial */}
+            {/* ACTIVIDAD EMPRESARIAL */}
             {selectedRegime === 'EMPRESARIAL' && (
               <>
+                {/* Selector de Mes - NUEVO */}
+                <MonthSelector
+                  selectedMonth={selectedMonth}
+                  onSelectMonth={handleMonthChange}
+                  theme={theme}
+                />
+
+                {/* Info sobre ingresos acumulados */}
+                <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
+                  <View style={styles.infoHeader}>
+                    <MaterialCommunityIcons 
+                      name="information" 
+                      size={18} 
+                      color={theme.accentLight} 
+                    />
+                    <Text style={[styles.infoTitle, { color: theme.text }]}>
+                      Ingresos y Deducciones Acumulados
+                    </Text>
+                  </View>
+                  <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                    Ingresa tus ingresos y deducciones acumulados hasta el mes seleccionado. 
+                    La calculadora usará la tabla correspondiente a ese mes.
+                  </Text>
+                </View>
+
                 <Input
-                  label="Ingresos Acumulables"
+                  label="Ingresos Acumulados"
                   prefix="$"
                   value={empresarialData.totalIncome}
                   onChangeText={(text) => handleEmpresarialChange('totalIncome', text)}
@@ -222,53 +230,43 @@ export default function Advanced() {
                   selectionColor={theme.accentLight}
                 />
 
-                <DeductionsInput
-                  theme={theme}
-                  fields={[
-                    {
-                      label: 'Compras y Costos de Ventas',
-                      value: empresarialData.purchases,
-                      onChangeText: (text) => handleEmpresarialChange('purchases', text),
-                      icon: 'shopping',
-                    },
-                    {
-                      label: 'Gastos de Operación',
-                      value: empresarialData.operatingExpenses,
-                      onChangeText: (text) => handleEmpresarialChange('operatingExpenses', text),
-                      icon: 'cash-multiple',
-                    },
-                    {
-                      label: 'Sueldos y Salarios',
-                      value: empresarialData.salaries,
-                      onChangeText: (text) => handleEmpresarialChange('salaries', text),
-                      icon: 'account-group',
-                    },
-                    {
-                      label: 'Rentas',
-                      value: empresarialData.rent,
-                      onChangeText: (text) => handleEmpresarialChange('rent', text),
-                      icon: 'home',
-                    },
-                    {
-                      label: 'Depreciaciones',
-                      value: empresarialData.depreciation,
-                      onChangeText: (text) => handleEmpresarialChange('depreciation', text),
-                      icon: 'trending-down',
-                    },
-                    {
-                      label: 'Intereses',
-                      value: empresarialData.interest,
-                      onChangeText: (text) => handleEmpresarialChange('interest', text),
-                      icon: 'percent',
-                    },
-                    {
-                      label: 'Otras Deducciones',
-                      value: empresarialData.otherDeductions,
-                      onChangeText: (text) => handleEmpresarialChange('otherDeductions', text),
-                      icon: 'format-list-bulleted',
-                    },
-                  ]}
+                <Input
+                  label="Deducciones Autorizadas Totales"
+                  prefix="$"
+                  value={empresarialData.totalDeductions}
+                  onChangeText={(text) => handleEmpresarialChange('totalDeductions', text)}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  backgroundColor={theme.inputBg}
+                  borderColor={theme.inputBorder}
+                  textColor={theme.text}
+                  labelColor={theme.text}
+                  prefixColor={theme.textSecondary}
+                  selectionColor={theme.accentLight}
                 />
+
+                <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
+                  <View style={styles.infoHeader}>
+                    <MaterialCommunityIcons 
+                      name="information" 
+                      size={18} 
+                      color={theme.accentLight} 
+                    />
+                    <Text style={[styles.infoTitle, { color: theme.text }]}>
+                      ¿Qué incluir en deducciones?
+                    </Text>
+                  </View>
+                  <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                    Suma todas tus deducciones acumuladas:{'\n'}
+                    • Compras y costos de ventas{'\n'}
+                    • Gastos de operación{'\n'}
+                    • Sueldos y salarios{'\n'}
+                    • Rentas del local{'\n'}
+                    • Depreciaciones{'\n'}
+                    • Intereses pagados{'\n'}
+                    • Otros gastos deducibles
+                  </Text>
+                </View>
 
                 <View style={[styles.section, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
                   <Text style={[styles.sectionTitle, { color: theme.text }]}>
@@ -306,7 +304,6 @@ export default function Advanced() {
                   />
                 </View>
 
-                {/* Preview de totales para Actividad Empresarial */}
                 {totals && totals.totalIncome > 0 && (
                   <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
                     <Text style={[styles.previewTitle, { color: theme.textSecondary }]}>Vista Previa</Text>
@@ -321,7 +318,7 @@ export default function Advanced() {
               </>
             )}
 
-            {/* Inputs para Persona Moral */}
+            {/* PERSONA MORAL */}
             {selectedRegime === 'MORAL' && (
               <>
                 <Input
@@ -339,59 +336,44 @@ export default function Advanced() {
                   selectionColor={theme.accentLight}
                 />
 
-                <DeductionsInput
-                  theme={theme}
-                  fields={[
-                    {
-                      label: 'Compras y Costos de Ventas',
-                      value: moralData.purchases,
-                      onChangeText: (text) => handleMoralChange('purchases', text),
-                      icon: 'shopping',
-                    },
-                    {
-                      label: 'Gastos de Operación',
-                      value: moralData.operatingExpenses,
-                      onChangeText: (text) => handleMoralChange('operatingExpenses', text),
-                      icon: 'cash-multiple',
-                    },
-                    {
-                      label: 'Sueldos y Salarios',
-                      value: moralData.salaries,
-                      onChangeText: (text) => handleMoralChange('salaries', text),
-                      icon: 'account-group',
-                    },
-                    {
-                      label: 'Rentas',
-                      value: moralData.rent,
-                      onChangeText: (text) => handleMoralChange('rent', text),
-                      icon: 'home',
-                    },
-                    {
-                      label: 'Depreciaciones',
-                      value: moralData.depreciation,
-                      onChangeText: (text) => handleMoralChange('depreciation', text),
-                      icon: 'trending-down',
-                    },
-                    {
-                      label: 'Intereses',
-                      value: moralData.interest,
-                      onChangeText: (text) => handleMoralChange('interest', text),
-                      icon: 'percent',
-                    },
-                    {
-                      label: 'Otras Deducciones',
-                      value: moralData.otherDeductions,
-                      onChangeText: (text) => handleMoralChange('otherDeductions', text),
-                      icon: 'format-list-bulleted',
-                    },
-                    {
-                      label: 'PTU Pagada',
-                      value: moralData.ptu,
-                      onChangeText: (text) => handleMoralChange('ptu', text),
-                      icon: 'hand-coin',
-                    },
-                  ]}
+                <Input
+                  label="Deducciones Autorizadas Totales"
+                  prefix="$"
+                  value={moralData.totalDeductions}
+                  onChangeText={(text) => handleMoralChange('totalDeductions', text)}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  backgroundColor={theme.inputBg}
+                  borderColor={theme.inputBorder}
+                  textColor={theme.text}
+                  labelColor={theme.text}
+                  prefixColor={theme.textSecondary}
+                  selectionColor={theme.accentLight}
                 />
+
+                <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
+                  <View style={styles.infoHeader}>
+                    <MaterialCommunityIcons 
+                      name="information" 
+                      size={18} 
+                      color={theme.accentLight} 
+                    />
+                    <Text style={[styles.infoTitle, { color: theme.text }]}>
+                      ¿Qué incluir en deducciones?
+                    </Text>
+                  </View>
+                  <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                    Suma todas tus deducciones autorizadas:{'\n'}
+                    • Compras y costos de ventas{'\n'}
+                    • Gastos de operación{'\n'}
+                    • Sueldos y salarios{'\n'}
+                    • Rentas{'\n'}
+                    • Depreciaciones{'\n'}
+                    • Intereses{'\n'}
+                    • PTU pagada{'\n'}
+                    • Otros gastos deducibles
+                  </Text>
+                </View>
 
                 <View style={[styles.section, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
                   <Text style={[styles.sectionTitle, { color: theme.text }]}>
@@ -444,7 +426,6 @@ export default function Advanced() {
                   />
                 </View>
 
-                {/* Preview de totales para Persona Moral */}
                 {totals && totals.totalIncome > 0 && (
                   <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
                     <Text style={[styles.previewTitle, { color: theme.textSecondary }]}>Vista Previa</Text>
@@ -459,7 +440,6 @@ export default function Advanced() {
               </>
             )}
 
-            {/* Botón de calcular */}
             {selectedRegime !== 'TABLES' && (
               <Button
                 title="CALCULAR ISR DETALLADO"
@@ -470,39 +450,22 @@ export default function Advanced() {
               />
             )}
 
-            {/* Resultados */}
             {showResults && result && selectedRegime !== 'TABLES' && (
               <AdvancedResultsCard result={result} regime={selectedRegime} theme={theme} />
             )}
           </Animated.View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  page: {
-    flex: 1,
-  },
-  headerContainer: {
-    // Header fijo en la parte superior
-    zIndex: 10,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+  container: { flex: 1 },
+  page: { flex: 1 },
+  headerContainer: { zIndex: 10 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   infoBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -511,10 +474,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
   },
-  infoBadgeText: {
-    fontSize: 13,
+  infoBadgeText: { fontSize: 13, marginLeft: 8, flex: 1 },
+  infoCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
     marginLeft: 8,
-    flex: 1,
+  },
+  infoText: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   section: {
     borderRadius: 12,
@@ -522,34 +500,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  calculateButton: {
-    marginBottom: 24,
-  },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 16 },
+  calculateButton: { marginBottom: 24 },
   previewCard: {
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
   },
-  previewTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  previewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  previewLabel: {
-    fontSize: 14,
-  },
-  previewValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
+  previewTitle: { fontSize: 12, fontWeight: '600', marginBottom: 8 },
+  previewRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  previewLabel: { fontSize: 14 },
+  previewValue: { fontSize: 14, fontWeight: 'bold' },
 });

@@ -1,70 +1,46 @@
 // utils/advancedCalculations.ts
-// Cálculos avanzados de ISR para RESICO, Actividad Empresarial y Persona Moral
+// ACTUALIZADO: Soporte para cálculo por mes en Actividad Empresarial
 
 import { CalculationResult, TaxBracket } from '@/types';
 import { 
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
   PERSONA_MORAL_RATE,
-  ACTIVIDAD_EMPRESARIAL_TABLE_2025
+  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
+  TaxBracketWithQuota
 } from '@/constants/TaxTables';
 
-/**
- * Interface para datos avanzados de RESICO
- */
 export interface ResicoAdvancedData {
-  totalIncome: number;           // Ingresos totales anuales
-  withheldISR: number;           // ISR retenido (1.25%)
-  provisionalPayments: number;   // Pagos provisionales realizados
-  withheldIVA?: number;          // IVA retenido (6%) - opcional
+  totalIncome: number;
+  withheldISR: number;
+  provisionalPayments: number;
+  withheldIVA?: number;
 }
 
-/**
- * Interface para datos avanzados de Actividad Empresarial
- */
 export interface EmpresarialAdvancedData {
-  totalIncome: number;           // Ingresos acumulables
-  purchases: number;             // Compras y costos de ventas
-  operatingExpenses: number;     // Gastos de operación
-  salaries: number;              // Sueldos y salarios
-  rent: number;                  // Rentas
-  depreciation: number;          // Depreciaciones
-  interest: number;              // Intereses
-  otherDeductions: number;       // Otras deducciones autorizadas
-  provisionalPayments: number;   // Pagos provisionales
-  withheldISR: number;           // Retenciones de ISR
+  totalIncome: number;
+  totalDeductions: number;
+  provisionalPayments: number;
+  withheldISR: number;
 }
 
-/**
- * Interface para datos avanzados de Persona Moral
- */
 export interface MoralAdvancedData {
-  totalIncome: number;           // Ingresos acumulables
-  purchases: number;             // Compras y costos de ventas
-  operatingExpenses: number;     // Gastos de operación
-  salaries: number;              // Sueldos y salarios
-  rent: number;                  // Rentas
-  depreciation: number;          // Depreciaciones
-  interest: number;              // Intereses
-  otherDeductions: number;       // Otras deducciones autorizadas
-  previousLosses: number;        // Pérdidas fiscales años anteriores
-  ptu: number;                   // PTU pagada
-  provisionalPayments: number;   // Pagos provisionales
-  withheldISR: number;           // Retenciones de ISR
+  totalIncome: number;
+  totalDeductions: number;
+  previousLosses: number;
+  provisionalPayments: number;
+  withheldISR: number;
 }
 
-/**
- * Resultado de cálculo avanzado
- */
 export interface AdvancedCalculationResult extends CalculationResult {
-  grossIncome: number;           // Ingresos brutos
-  totalDeductions: number;       // Deducciones totales
-  taxableBase: number;           // Base gravable
-  grossISR: number;              // ISR causado
-  withheldISR: number;           // ISR retenido
-  provisionalPayments: number;   // Pagos provisionales
-  finalISR: number;              // ISR final a pagar/devolver
-  isFavorBalance: boolean;       // Si es saldo a favor
+  grossIncome: number;
+  totalDeductions: number;
+  taxableBase: number;
+  grossISR: number;
+  withheldISR: number;
+  provisionalPayments: number;
+  finalISR: number;
+  isFavorBalance: boolean;
 }
 
 /**
@@ -75,15 +51,12 @@ export const calculateAdvancedResico = (
 ): AdvancedCalculationResult => {
   const { totalIncome, withheldISR, provisionalPayments, withheldIVA = 0 } = data;
 
-  // Validaciones
   if (isNaN(totalIncome) || totalIncome <= 0) {
     return createEmptyAdvancedResult();
   }
 
-  // En RESICO, la base gravable es igual a los ingresos (sin deducciones)
   const taxableBase = totalIncome;
 
-  // Buscar el tramo de ISR
   let bracket: TaxBracket | null = null;
   for (let b of RESICO_TAX_TABLE_2025) {
     if (totalIncome >= b.min && totalIncome <= b.max) {
@@ -96,10 +69,7 @@ export const calculateAdvancedResico = (
     return createEmptyAdvancedResult();
   }
 
-  // Calcular ISR causado (bruto)
   const grossISR = totalIncome * bracket.rate;
-
-  // Calcular ISR final
   const finalISR = grossISR - withheldISR - provisionalPayments;
   const isFavorBalance = finalISR < 0;
 
@@ -109,7 +79,7 @@ export const calculateAdvancedResico = (
     bracket: `$${bracket.min.toLocaleString()} - $${bracket.max.toLocaleString()}`,
     netIncome: totalIncome - grossISR,
     grossIncome: totalIncome,
-    totalDeductions: 0, // RESICO no permite deducciones
+    totalDeductions: 0,
     taxableBase,
     grossISR,
     withheldISR,
@@ -121,58 +91,46 @@ export const calculateAdvancedResico = (
 
 /**
  * Calcula ISR avanzado para Actividad Empresarial
+ * @param data Datos de ingresos y deducciones
+ * @param month Mes para usar la tabla correspondiente (1-12)
  */
 export const calculateAdvancedEmpresarial = (
-  data: EmpresarialAdvancedData
+  data: EmpresarialAdvancedData,
+  month: number = 12
 ): AdvancedCalculationResult => {
   const {
     totalIncome,
-    purchases,
-    operatingExpenses,
-    salaries,
-    rent,
-    depreciation,
-    interest,
-    otherDeductions,
+    totalDeductions,
     provisionalPayments,
     withheldISR,
   } = data;
 
-  // Validaciones
   if (isNaN(totalIncome) || totalIncome <= 0) {
     return createEmptyAdvancedResult();
   }
 
-  // Calcular deducciones totales
-  const totalDeductions =
-    purchases +
-    operatingExpenses +
-    salaries +
-    rent +
-    depreciation +
-    interest +
-    otherDeductions;
-
   // Base gravable = Ingresos - Deducciones
   let taxableBase = totalIncome - totalDeductions;
   
-  // La base gravable no puede ser negativa
   if (taxableBase < 0) {
     taxableBase = 0;
   }
+
+  // Obtener tabla del mes correspondiente
+  const monthlyTable = getTablaParaMes(month);
 
   // Buscar tramo de ISR
   let grossISR = 0;
   let rate = 0;
   let bracketString = 'N/A';
 
-  for (let bracket of ACTIVIDAD_EMPRESARIAL_TABLE_2025) {
+  for (let bracket of monthlyTable) {
     if (taxableBase >= bracket.min && taxableBase <= bracket.max) {
       // Cálculo: Cuota Fija + (Excedente × Tasa)
       const excess = taxableBase - bracket.min;
       grossISR = bracket.fixedFee + (excess * bracket.rate);
       rate = bracket.rate * 100;
-      bracketString = `$${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2 })} - $${bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      bracketString = `$${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2 })} - $${bracket.max === 999999999.99 ? 'En adelante' : bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
       break;
     }
   }
@@ -201,6 +159,19 @@ export const calculateAdvancedEmpresarial = (
 };
 
 /**
+ * Obtiene la tabla de ISR para un mes específico
+ * Multiplica los límites y cuota fija por el número de mes
+ */
+const getTablaParaMes = (mesNumero: number): TaxBracketWithQuota[] => {
+  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map(bracket => ({
+    ...bracket,
+    min: bracket.min * mesNumero,
+    max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * mesNumero,
+    fixedFee: bracket.fixedFee * mesNumero,
+  }));
+};
+
+/**
  * Calcula ISR avanzado para Persona Moral
  */
 export const calculateAdvancedMoral = (
@@ -208,51 +179,25 @@ export const calculateAdvancedMoral = (
 ): AdvancedCalculationResult => {
   const {
     totalIncome,
-    purchases,
-    operatingExpenses,
-    salaries,
-    rent,
-    depreciation,
-    interest,
-    otherDeductions,
+    totalDeductions,
     previousLosses,
-    ptu,
     provisionalPayments,
     withheldISR,
   } = data;
 
-  // Validaciones
   if (isNaN(totalIncome) || totalIncome <= 0) {
     return createEmptyAdvancedResult();
   }
 
-  // Calcular deducciones totales
-  const totalDeductions =
-    purchases +
-    operatingExpenses +
-    salaries +
-    rent +
-    depreciation +
-    interest +
-    otherDeductions +
-    ptu;
-
-  // Base gravable = Ingresos - Deducciones - Pérdidas fiscales
   let taxableBase = totalIncome - totalDeductions - previousLosses;
   
-  // La base gravable no puede ser negativa para efectos de ISR
   if (taxableBase < 0) {
     taxableBase = 0;
   }
 
-  // ISR causado = Base gravable × 30%
   const grossISR = taxableBase * PERSONA_MORAL_RATE;
-
-  // ISR final = ISR causado - Pagos provisionales - Retenciones
   const finalISR = grossISR - provisionalPayments - withheldISR;
   const isFavorBalance = finalISR < 0;
-
-  // Ingreso neto = Utilidad fiscal - ISR
   const netIncome = taxableBase - grossISR;
 
   return {
@@ -289,48 +234,23 @@ const createEmptyAdvancedResult = (): AdvancedCalculationResult => ({
   isFavorBalance: false,
 });
 
-/**
- * Calcula el porcentaje efectivo de ISR
- */
-export const calculateEffectiveRate = (
-  isr: number,
-  income: number
-): number => {
+export const calculateEffectiveRate = (isr: number, income: number): number => {
   if (income === 0) return 0;
   return (isr / income) * 100;
 };
 
-/**
- * Valida que las deducciones no excedan los ingresos
- */
-export const validateDeductions = (
-  income: number,
-  deductions: number
-): boolean => {
-  // Las deducciones pueden exceder los ingresos (genera pérdida fiscal)
-  // Pero mostramos warning si es más del 95%
+export const validateDeductions = (income: number, deductions: number): boolean => {
   return deductions <= income * 0.95;
 };
 
-/**
- * Calcula cuánto puede deducir como máximo
- */
 export const getMaxDeductible = (income: number): number => {
-  // En teoría no hay límite, pero sugerimos hasta 80% como "normal"
   return income * 0.80;
 };
 
-/**
- * Estima pagos provisionales mensuales (RESICO)
- */
-export const estimateMonthlyPayment = (
-  annualIncome: number,
-  month: number
-): number => {
+export const estimateMonthlyPayment = (annualIncome: number, month: number): number => {
   const monthlyIncome = annualIncome / 12;
   const accumulatedIncome = monthlyIncome * month;
   
-  // Buscar tramo
   for (let bracket of RESICO_TAX_TABLE_2025) {
     if (accumulatedIncome >= bracket.min && accumulatedIncome <= bracket.max) {
       return accumulatedIncome * bracket.rate;
