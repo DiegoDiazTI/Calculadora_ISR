@@ -43,10 +43,22 @@ export const DiazLaraTheme = {
     accent: DiazLaraColors.tealPrimary,
     accentLight: DiazLaraColors.tealLight,
     accentHover: DiazLaraColors.accentRed,
+    accentBg: 'rgba(0, 74, 74, 0.2)',
     
     // Borders
     border: DiazLaraColors.border,
     inputBorder: 'rgba(255, 255, 255, 0.1)',
+    cardBorder: 'rgba(255, 255, 255, 0.1)',
+    
+    // Disabled states
+    disabledIcon: '#6B7280',
+    disabledText: '#6B7280',
+    
+    // Card variations
+    characteristicsCard: 'rgba(0, 74, 74, 0.15)',
+    characteristicsText: '#E5E7EB',
+    resultCard: DiazLaraColors.grayDark,
+    resultCardText: '#FFFFFF',
     
     // Status bar
     statusBar: 'light-content' as const,
@@ -68,10 +80,22 @@ export const DiazLaraTheme = {
     accent: DiazLaraColors.tealPrimary,
     accentLight: DiazLaraColors.tealLight,
     accentHover: DiazLaraColors.accentRed,
+    accentBg: DiazLaraColors.tealTranslucent,
     
     // Borders
     border: DiazLaraColors.borderLight,
     inputBorder: DiazLaraColors.borderLight,
+    cardBorder: DiazLaraColors.border,
+    
+    // Disabled states
+    disabledIcon: DiazLaraColors.textLight,
+    disabledText: DiazLaraColors.textLight,
+    
+    // Card variations
+    characteristicsCard: DiazLaraColors.tealTranslucent,
+    characteristicsText: DiazLaraColors.textDark,
+    resultCard: DiazLaraColors.white,
+    resultCardText: DiazLaraColors.textDark,
     
     // Status bar
     statusBar: 'dark-content' as const,

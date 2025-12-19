@@ -1,7 +1,7 @@
 // hooks/useCalculator.ts
 // CORRECTO FINAL: Persona Moral usa coeficiente para ISR anual, SIN tabla de pagos provisionales
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegimeType, CalculationResult } from '@/types';
 import { 
   calculateResicoISR, 
@@ -10,16 +10,35 @@ import {
 } from '@/utils/calculations';
 import { formatCurrencyInput, parseCurrency } from '@/utils/formatters';
 
-export const useCalculator = () => {
-  const [selectedRegime, setSelectedRegime] = useState<RegimeType>('RESICO');
+export const useCalculator = (
+  initialRegime: RegimeType = 'RESICO',
+  initialPeriod: 'mensual' | 'anual' = 'anual'
+) => {
+  const [selectedRegime] = useState<RegimeType>(initialRegime);
   const [annualIncome, setAnnualIncome] = useState('1,250,000');
   const [deductions, setDeductions] = useState('0');
   
   // Estado para Persona Moral - Coeficiente de Utilidad
   const [utilityCoefficient, setUtilityCoefficient] = useState('0.2360');
   
+  // Estado para RESICO - Periodo de cálculo (mensual/anual)
+  const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod);
+  
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
+
+  /**
+   * Limpia resultados cuando cambia el régimen desde el contexto
+   */
+  useEffect(() => {
+    setShowResults(false);
+    setResult(null);
+    
+    // Resetear deducciones si no es empresarial
+    if (initialRegime !== 'EMPRESARIAL') {
+      setDeductions('0');
+    }
+  }, [initialRegime]);
 
   /**
    * Maneja el cambio de ingreso con formato
@@ -64,17 +83,11 @@ export const useCalculator = () => {
   };
 
   /**
-   * Maneja el cambio de régimen
+   * Maneja el cambio de periodo para RESICO
    */
-  const handleRegimeChange = (regime: RegimeType) => {
-    setSelectedRegime(regime);
+  const handleResicoPeriodChange = (period: 'mensual' | 'anual') => {
+    setResicoPeriod(period);
     setShowResults(false);
-    setResult(null);
-    
-    // Resetear deducciones al cambiar de régimen
-    if (regime !== 'EMPRESARIAL') {
-      setDeductions('0');
-    }
   };
 
   /**
@@ -102,7 +115,7 @@ export const useCalculator = () => {
     let calculationResult: CalculationResult;
 
     if (selectedRegime === 'RESICO') {
-      calculationResult = calculateResicoISR(income);
+      calculationResult = calculateResicoISR(income, resicoPeriod);
     } else if (selectedRegime === 'MORAL') {
       // Para Persona Moral: Ingresos × Coeficiente = Utilidad Fiscal
       const coefficient = parseFloat(utilityCoefficient || '0');
@@ -152,12 +165,13 @@ export const useCalculator = () => {
     annualIncome,
     deductions,
     utilityCoefficient,
+    resicoPeriod,
     showResults,
     result,
     handleIncomeChange,
     handleDeductionsChange,
     handleCoefficientChange,
-    handleRegimeChange,
+    handleResicoPeriodChange,
     calculateISR,
     reset,
     getTaxableBase,

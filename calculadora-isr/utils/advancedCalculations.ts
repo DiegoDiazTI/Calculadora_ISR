@@ -3,6 +3,8 @@
 
 import { CalculationResult, TaxBracket } from '@/types';
 import { 
+  RESICO_TAX_TABLE_ANUAL_2025,
+  RESICO_TAX_TABLE_MENSUAL_2025,
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
   PERSONA_MORAL_RATE,
@@ -47,7 +49,8 @@ export interface AdvancedCalculationResult extends CalculationResult {
  * Calcula ISR avanzado para RESICO
  */
 export const calculateAdvancedResico = (
-  data: ResicoAdvancedData
+  data: ResicoAdvancedData,
+  period: 'mensual' | 'anual' = 'anual'
 ): AdvancedCalculationResult => {
   const { totalIncome, withheldISR, provisionalPayments, withheldIVA = 0 } = data;
 
@@ -57,8 +60,13 @@ export const calculateAdvancedResico = (
 
   const taxableBase = totalIncome;
 
+  // Seleccionar tabla según periodo
+  const table = period === 'mensual' 
+    ? RESICO_TAX_TABLE_MENSUAL_2025 
+    : RESICO_TAX_TABLE_ANUAL_2025;
+
   let bracket: TaxBracket | null = null;
-  for (let b of RESICO_TAX_TABLE_2025) {
+  for (let b of table) {
     if (totalIncome >= b.min && totalIncome <= b.max) {
       bracket = b;
       break;
@@ -163,7 +171,7 @@ export const calculateAdvancedEmpresarial = (
  * Multiplica los límites y cuota fija por el número de mes
  */
 const getTablaParaMes = (mesNumero: number): TaxBracketWithQuota[] => {
-  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map(bracket => ({
+  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map((bracket: TaxBracketWithQuota) => ({
     ...bracket,
     min: bracket.min * mesNumero,
     max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * mesNumero,

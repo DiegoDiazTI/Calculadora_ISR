@@ -15,10 +15,12 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/hooks/useTheme';
 import { useAdvancedCalculator } from '@/hooks/useAdvancedCalculator';
+import { useAppContext } from '@/contexts/AppContext';
 import { Header } from '@/components/layout/Header';
 import { RegimeSelector } from '@/components/calculator/RegimeSelector';
 import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard';
 import { MonthSelector } from '@/components/calculator/MonthSelector';
+import { PeriodSelector } from '@/components/calculator/PeriodSelector';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import AdvancedResultsCard from '@/components/calculator/AdvancedResultsCard';
@@ -29,23 +31,36 @@ const HEADER_BG = '#000000';
 
 export default function Advanced() {
   const navigation = useNavigation();
-  const { isDarkMode, theme, toggleTheme } = useTheme();
+  
+  // Usar contexto global para régimen y tema
+  const { selectedRegime, setSelectedRegime, isDarkMode, theme, toggleTheme } = useAppContext();
+  
+  // Primero declaramos resicoPeriod con un estado local temporal
+  const [localResicoPeriod, setLocalResicoPeriod] = useState<'mensual' | 'anual'>('anual');
+  
   const {
-    selectedRegime,
     showResults,
     result,
     resicoData,
     empresarialData,
     moralData,
     selectedMonth,
+    resicoPeriod,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
-    handleRegimeChange,
     handleMonthChange,
+    handleResicoPeriodChange,
     calculateISR,
     getTotals,
-  } = useAdvancedCalculator();
+  } = useAdvancedCalculator(selectedRegime, localResicoPeriod);
+  
+  // Sincronizar resicoPeriod del hook con el estado local
+  useEffect(() => {
+    if (resicoPeriod !== localResicoPeriod) {
+      setLocalResicoPeriod(resicoPeriod);
+    }
+  }, [resicoPeriod]);
 
   const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -111,7 +126,7 @@ export default function Advanced() {
 
             <RegimeSelector
               selectedRegime={selectedRegime}
-              onSelectRegime={handleRegimeChange}
+              onSelectRegime={setSelectedRegime}
               theme={theme}
             />
 
@@ -132,8 +147,14 @@ export default function Advanced() {
             {/* RESICO */}
             {selectedRegime === 'RESICO' && (
               <>
+                <PeriodSelector
+                  selectedPeriod={resicoPeriod}
+                  onSelectPeriod={handleResicoPeriodChange}
+                  theme={theme}
+                />
+
                 <Input
-                  label="Ingresos Totales Anuales"
+                  label={resicoPeriod === 'mensual' ? "Ingresos Mensuales" : "Ingresos Totales Anuales"}
                   prefix="$"
                   value={resicoData.totalIncome}
                   onChangeText={(text) => handleResicoChange('totalIncome', text)}
@@ -182,7 +203,7 @@ export default function Advanced() {
                     selectionColor={theme.accentLight}
                   />
 
-                  
+
                 </View>
               </>
             )}

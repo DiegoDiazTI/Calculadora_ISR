@@ -2,49 +2,56 @@
 // CORRECTO FINAL: Persona Moral con coeficiente, SIN botón ni tabla de pagos provisionales
 
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text, Animated } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { SplashScreen } from '@/components/layout/SplashScreen';
 import { Header } from '@/components/layout/Header';
 import { RegimeSelector } from '@/components/calculator/RegimeSelector';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ResultsCard } from '@/components/calculator/ResultsCard';
 import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard';
+import { PeriodSelector } from '@/components/calculator/PeriodSelector';
 import { AllTaxTables } from '@/components/calculator/AllTaxTables';
 import { useTheme } from '@/hooks/useTheme';
 import { useCalculator } from '@/hooks/useCalculator';
+import { useAppContext } from '@/contexts/AppContext';
 import { REGIMES } from '@/constants/Regimes';
 
 const HEADER_BG = '#000000';
 
 export default function Index() {
-  const [showSplash, setShowSplash] = useState(true);
   const navigation = useNavigation();
-  const { isDarkMode, theme, toggleTheme } = useTheme();
+  
+  // Usar contexto global para régimen y tema
+  const { selectedRegime, setSelectedRegime, isDarkMode, theme, toggleTheme } = useAppContext();
+  
+  // Primero declaramos resicoPeriod con un estado local temporal
+  const [localResicoPeriod, setLocalResicoPeriod] = useState<'mensual' | 'anual'>('anual');
+  
   const {
-    selectedRegime,
     annualIncome,
     deductions,
     utilityCoefficient,
+    resicoPeriod,
     showResults,
     result,
     handleIncomeChange,
     handleDeductionsChange,
     handleCoefficientChange,
-    handleRegimeChange,
+    handleResicoPeriodChange,
     calculateISR,
     reset,
     getTaxableBase,
-  } = useCalculator();
-
+  } = useCalculator(selectedRegime, localResicoPeriod);
+  
+  // Sincronizar resicoPeriod del hook con el estado local
   useEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: { display: showSplash ? 'none' : 'flex' }
-    });
-  }, [showSplash, navigation]);
+    if (resicoPeriod !== localResicoPeriod) {
+      setLocalResicoPeriod(resicoPeriod);
+    }
+  }, [resicoPeriod]);
 
   useEffect(() => {
     const baseTabBarStyle = {
@@ -60,20 +67,17 @@ export default function Index() {
     const inactiveColor = isDarkMode ? '#E2E8F0' : theme.textSecondary;
 
     navigation.setOptions({
-      tabBarStyle: showSplash ? { display: 'none' } : baseTabBarStyle,
+      tabBarStyle: baseTabBarStyle,
       tabBarActiveTintColor: activeColor,
       tabBarInactiveTintColor: inactiveColor,
     });
-  }, [navigation, showSplash, theme, isDarkMode]);
-
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
+  }, [navigation, theme, isDarkMode]);
 
   const currentRegime = REGIMES.find((r) => r.id === selectedRegime);
   const isTableView = selectedRegime === 'TABLES';
   const isEmpresarial = selectedRegime === 'EMPRESARIAL';
   const isMoral = selectedRegime === 'MORAL';
+  const isResico = selectedRegime === 'RESICO';
   const taxableBase = getTaxableBase();
 
   // Calcular utilidad fiscal para preview (solo Persona Moral)
@@ -100,7 +104,7 @@ export default function Index() {
         >
           <RegimeSelector
             selectedRegime={selectedRegime}
-            onSelectRegime={handleRegimeChange}
+            onSelectRegime={setSelectedRegime}
             theme={theme}
           />
 
@@ -112,6 +116,15 @@ export default function Index() {
                 <CharacteristicsCard
                   title={`Características de ${currentRegime.title}`}
                   characteristics={currentRegime.characteristics}
+                  theme={theme}
+                />
+              )}
+
+              {/* RESICO - SELECTOR DE PERIODO */}
+              {isResico && (
+                <PeriodSelector
+                  selectedPeriod={resicoPeriod}
+                  onSelectPeriod={handleResicoPeriodChange}
                   theme={theme}
                 />
               )}
@@ -167,8 +180,8 @@ export default function Index() {
                     ? "Ingresos Acumulables" 
                     : isMoral
                     ? "Ingresos Nominales Anuales"
-                    : selectedRegime === 'RESICO'
-                    ? "Ingresos Anuales"
+                    : isResico
+                    ? (resicoPeriod === 'mensual' ? "Ingresos Mensuales" : "Ingresos Anuales")
                     : "Utilidad Fiscal"
                 }
                 prefix="$"
@@ -321,12 +334,7 @@ export default function Index() {
                     regime={selectedRegime}
                     theme={theme}
                   />
-                  <Button
-                    title="Nuevo Cálculo"
-                    icon="refresh"
-                    onPress={reset}
-                    backgroundColor={theme.accent}
-                  />
+
                 </>
               )}
             </>

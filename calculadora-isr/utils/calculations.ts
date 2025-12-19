@@ -3,19 +3,23 @@
 
 import { CalculationResult, TaxBracket } from '@/types';
 import { 
+  RESICO_TAX_TABLE_ANUAL_2025,
+  RESICO_TAX_TABLE_MENSUAL_2025,
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
-  PERSONA_MORAL_RATE,
-  ACTIVIDAD_EMPRESARIAL_TABLE_2025,
-  TaxBracketWithQuota
+  PERSONA_MORAL_RATE 
 } from '@/constants/TaxTables';
 
 /**
  * Calcula el ISR para régimen RESICO
- * @param income - Ingreso anual
+ * @param income - Ingreso (mensual o anual según periodo)
+ * @param period - 'mensual' o 'anual'
  * @returns Resultado del cálculo
  */
-export const calculateResicoISR = (income: number): CalculationResult => {
+export const calculateResicoISR = (
+  income: number, 
+  period: 'mensual' | 'anual' = 'anual'
+): CalculationResult => {
   // Validación de entrada
   if (isNaN(income) || income <= 0) {
     return {
@@ -26,8 +30,13 @@ export const calculateResicoISR = (income: number): CalculationResult => {
     };
   }
 
-  // Verificar si excede el límite
-  if (income > RESICO_MAX_INCOME) {
+  // Seleccionar tabla según periodo
+  const table = period === 'mensual' 
+    ? RESICO_TAX_TABLE_MENSUAL_2025 
+    : RESICO_TAX_TABLE_ANUAL_2025;
+
+  // Verificar si excede el límite (solo para anual)
+  if (period === 'anual' && income > RESICO_MAX_INCOME) {
     return {
       tax: 0,
       rate: 0,
@@ -37,7 +46,7 @@ export const calculateResicoISR = (income: number): CalculationResult => {
   }
 
   // Buscar el tramo correspondiente
-  for (let bracket of RESICO_TAX_TABLE_2025) {
+  for (let bracket of table) {
     if (income >= bracket.min && income <= bracket.max) {
       const tax = income * bracket.rate;
       return {
@@ -81,48 +90,6 @@ export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
     rate: PERSONA_MORAL_RATE * 100,
     bracket: 'Tasa General',
     netIncome: utilityFiscal - tax,
-  };
-};
-
-/**
- * Calcula el ISR para Actividad Empresarial (Persona Física)
- * Sistema progresivo: Cuota Fija + (Excedente del límite inferior × Tasa)
- * @param taxableBase - Base gravable (ingresos - deducciones)
- * @returns Resultado del cálculo
- */
-export const calculateActividadEmpresarialISR = (taxableBase: number): CalculationResult => {
-  // Validación de entrada
-  if (isNaN(taxableBase) || taxableBase <= 0) {
-    return {
-      tax: 0,
-      rate: 0,
-      bracket: 'N/A',
-      netIncome: 0,
-    };
-  }
-
-  // Buscar el tramo correspondiente
-  for (let bracket of ACTIVIDAD_EMPRESARIAL_TABLE_2025) {
-    if (taxableBase >= bracket.min && taxableBase <= bracket.max) {
-      // Cálculo: Cuota Fija + (Excedente × Tasa)
-      const excess = taxableBase - bracket.min;
-      const tax = bracket.fixedFee + (excess * bracket.rate);
-      
-      return {
-        tax: tax,
-        rate: bracket.rate * 100,
-        bracket: `$${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        netIncome: taxableBase - tax,
-      };
-    }
-  }
-
-  // Si no encuentra tramo (no debería pasar)
-  return {
-    tax: 0,
-    rate: 0,
-    bracket: 'Error en cálculo',
-    netIncome: taxableBase,
   };
 };
 
@@ -193,4 +160,33 @@ export const calculateTaxPercentage = (tax: number, income: number): number => {
 export const projectAnnualISR = (monthlyIncome: number): CalculationResult => {
   const annualIncome = monthlyIncome * 12;
   return calculateResicoISR(annualIncome);
+};
+
+/**
+ * Calcula el ISR para Actividad Empresarial (tabla anual)
+ * @param taxableBase - Base gravable (ingresos - deducciones)
+ * @returns Resultado del cálculo
+ */
+export const calculateActividadEmpresarialISR = (taxableBase: number): CalculationResult => {
+  // Validación de entrada
+  if (isNaN(taxableBase) || taxableBase <= 0) {
+    return {
+      tax: 0,
+      rate: 0,
+      bracket: 'N/A',
+      netIncome: 0,
+    };
+  }
+
+  // Tabla anual simplificada (para calculadora simple)
+  // Esta es una aproximación - en avanzada se usa la tabla mensual
+  const annualRate = 0.30; // Tasa aproximada del 30%
+  const tax = taxableBase * annualRate;
+
+  return {
+    tax: tax,
+    rate: annualRate * 100,
+    bracket: 'Régimen General',
+    netIncome: taxableBase - tax,
+  };
 };

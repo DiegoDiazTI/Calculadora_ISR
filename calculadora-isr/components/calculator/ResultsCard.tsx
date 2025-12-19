@@ -5,7 +5,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CalculationResult, ThemeColors, RegimeType } from '@/types';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, formatPercentage } from '@/utils/formatters';
 
 interface ResultsCardProps {
   result: CalculationResult;
@@ -36,11 +36,13 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
       </View>
 
       {/* ISR Principal */}
-      <View style={[styles.mainCard, { backgroundColor: theme.resultCard }]}>
-        <Text style={[styles.mainLabel, { color: theme.characteristicsText }]}>
+      <View style={[styles.mainCard, { backgroundColor: theme.accent }]}>
+        <Text style={[styles.mainLabel, { color: '#FFFFFF' }]}>
           ISR a Pagar
         </Text>
-        <Text style={styles.mainValue}>${formatCurrency(result.tax)}</Text>
+        <Text style={[styles.mainValue, { color: '#FFFFFF' }]}>
+          ${formatCurrency(result.tax)}
+        </Text>
       </View>
 
       {/* Detalles */}
@@ -129,7 +131,6 @@ const styles = StyleSheet.create({
   mainValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   detailsContainer: {
     flexDirection: 'row',

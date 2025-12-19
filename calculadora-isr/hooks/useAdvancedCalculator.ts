@@ -1,7 +1,7 @@
 // hooks/useAdvancedCalculator.ts
 // ACTUALIZADO: Soporte para selección de mes en Actividad Empresarial
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegimeType } from '@/types';
 import {
   calculateAdvancedResico,
@@ -14,11 +14,23 @@ import {
 } from '@/utils/advancedCalculations';
 import { formatCurrencyInput, parseCurrency } from '@/utils/formatters';
 
-export const useAdvancedCalculator = () => {
-  const [selectedRegime, setSelectedRegime] = useState<RegimeType>('RESICO');
+export const useAdvancedCalculator = (
+  initialRegime: RegimeType = 'RESICO',
+  initialPeriod: 'mensual' | 'anual' = 'anual'
+) => {
+  const [selectedRegime] = useState<RegimeType>(initialRegime);
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<AdvancedCalculationResult | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number>(11); // ← NUEVO: Diciembre por defecto (índice 11)
+  const [selectedMonth, setSelectedMonth] = useState<number>(11); // Diciembre por defecto
+  const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod); // Periodo RESICO
+
+  /**
+   * Limpia resultados cuando cambia el régimen desde el contexto
+   */
+  useEffect(() => {
+    setShowResults(false);
+    setResult(null);
+  }, [initialRegime]);
 
   // Estados para RESICO
   const [resicoData, setResicoData] = useState({
@@ -88,19 +100,18 @@ export const useAdvancedCalculator = () => {
   };
 
   /**
-   * Maneja el cambio de régimen
-   */
-  const handleRegimeChange = (regime: RegimeType) => {
-    setSelectedRegime(regime);
-    setShowResults(false);
-    setResult(null);
-  };
-
-  /**
    * Maneja el cambio de mes
    */
   const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de periodo para RESICO
+   */
+  const handleResicoPeriodChange = (period: 'mensual' | 'anual') => {
+    setResicoPeriod(period);
     setShowResults(false);
   };
 
@@ -117,7 +128,7 @@ export const useAdvancedCalculator = () => {
         provisionalPayments: parseCurrency(resicoData.provisionalPayments),
         withheldIVA: parseCurrency(resicoData.withheldIVA),
       };
-      calculationResult = calculateAdvancedResico(data);
+      calculationResult = calculateAdvancedResico(data, resicoPeriod);
     } else if (selectedRegime === 'EMPRESARIAL') {
       const data: EmpresarialAdvancedData = {
         totalIncome: parseCurrency(empresarialData.totalIncome),
@@ -205,11 +216,12 @@ export const useAdvancedCalculator = () => {
     empresarialData,
     moralData,
     selectedMonth,
+    resicoPeriod,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
-    handleRegimeChange,
     handleMonthChange,
+    handleResicoPeriodChange,
     calculateISR,
     reset,
     getTotals,
