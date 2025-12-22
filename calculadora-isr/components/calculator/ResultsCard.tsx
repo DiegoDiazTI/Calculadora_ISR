@@ -81,11 +81,12 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
             style={[
               styles.barFilled,
               {
-                width: `${taxPercentage}%`,
+                flex: taxPercentage / 100,
                 backgroundColor: theme.accentLight,
               },
             ]}
           />
+          <View style={{ flex: (100 - taxPercentage) / 100 }} />
         </View>
         <View style={styles.labels}>
           <Text style={[styles.breakdownLabel, { color: theme.textSecondary }]}>
@@ -175,6 +176,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
+    flexDirection: 'row',
   },
   barFilled: {
     height: '100%',
