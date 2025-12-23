@@ -1,14 +1,28 @@
-// utils/calculations.ts
-// Funciones para cálculos de ISR
+// utils/calculations.ts - VERSIÓN CORREGIDA
+// Funciones para cálculos de ISR con mejor manejo de errores
 
 import { CalculationResult, TaxBracket } from '@/types';
 import { 
   RESICO_TAX_TABLE_ANUAL_2025,
-  RESICO_TAX_TABLE_MENSUAL_2025,
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
   PERSONA_MORAL_RATE 
 } from '@/constants/TaxTables';
+
+/**
+ * Valida y limpia un número de entrada
+ */
+const validateNumber = (value: number): number => {
+  // Convertir a número si es string
+  const num = typeof value === 'string' ? parseFloat((value as string).replace(/[^0-9.-]/g, '')) : value;
+  
+  // Validar que sea un número válido
+  if (typeof num !== 'number' || !isFinite(num) || num < 0) {
+    return 0;
+  }
+  
+  return num;
+};
 
 /**
  * Calcula el ISR para régimen RESICO
@@ -20,8 +34,13 @@ export const calculateResicoISR = (
   income: number, 
   period: 'mensual' | 'anual' = 'anual'
 ): CalculationResult => {
-  // Validación de entrada
-  if (isNaN(income) || income <= 0) {
+  // Validación robusta de entrada
+  const validIncome = validateNumber(income);
+  
+  console.log('RESICO Cálculo:', { income, validIncome, period }); // Debug
+  
+  if (validIncome <= 0) {
+    console.log('RESICO: Ingreso inválido o cero');
     return {
       tax: 0,
       rate: 0,
@@ -31,39 +50,44 @@ export const calculateResicoISR = (
   }
 
   // Seleccionar tabla según periodo
-  const table = period === 'mensual' 
-    ? RESICO_TAX_TABLE_MENSUAL_2025 
-    : RESICO_TAX_TABLE_ANUAL_2025;
+  const table = RESICO_TAX_TABLE_ANUAL_2025;
+
+  console.log('RESICO: Usando tabla', period, 'con', table.length, 'tramos');
 
   // Verificar si excede el límite (solo para anual)
-  if (period === 'anual' && income > RESICO_MAX_INCOME) {
+  if (period === 'anual' && validIncome > RESICO_MAX_INCOME) {
+    console.log('RESICO: Excede límite', RESICO_MAX_INCOME);
     return {
       tax: 0,
       rate: 0,
       bracket: 'Excede límite RESICO',
-      netIncome: income,
+      netIncome: validIncome,
     };
   }
 
   // Buscar el tramo correspondiente
   for (let bracket of table) {
-    if (income >= bracket.min && income <= bracket.max) {
-      const tax = income * bracket.rate;
-      return {
+    if (validIncome >= bracket.min && validIncome <= bracket.max) {
+      const tax = validIncome * bracket.rate;
+      const result = {
         tax: tax,
         rate: bracket.rate * 100,
-        bracket: `$${bracket.min.toLocaleString()} - $${bracket.max.toLocaleString()}`,
-        netIncome: income - tax,
+        bracket: `$${Math.floor(bracket.min).toLocaleString('en-US')} - $${Math.floor(bracket.max).toLocaleString('en-US')}`,
+        netIncome: validIncome - tax,
       };
+      
+      console.log('RESICO: Resultado calculado', result); // Debug
+      return result;
     }
   }
 
   // Caso por defecto (no debería llegar aquí)
+  console.error('RESICO: No se encontró tramo para ingreso', validIncome);
   return {
     tax: 0,
     rate: 0,
     bracket: 'Error en cálculo',
-    netIncome: income,
+    netIncome: validIncome,
   };
 };
 
@@ -73,8 +97,13 @@ export const calculateResicoISR = (
  * @returns Resultado del cálculo
  */
 export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
-  // Validación de entrada
-  if (isNaN(utilityFiscal) || utilityFiscal <= 0) {
+  // Validación robusta de entrada
+  const validUtility = validateNumber(utilityFiscal);
+  
+  console.log('MORAL Cálculo:', { utilityFiscal, validUtility }); // Debug
+  
+  if (validUtility <= 0) {
+    console.log('MORAL: Utilidad inválida o cero');
     return {
       tax: 0,
       rate: 0,
@@ -83,14 +112,16 @@ export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
     };
   }
 
-  const tax = utilityFiscal * PERSONA_MORAL_RATE;
-  
-  return {
+  const tax = validUtility * PERSONA_MORAL_RATE;
+  const result = {
     tax: tax,
     rate: PERSONA_MORAL_RATE * 100,
     bracket: 'Tasa General',
-    netIncome: utilityFiscal - tax,
+    netIncome: validUtility - tax,
   };
+  
+  console.log('MORAL: Resultado calculado', result); // Debug
+  return result;
 };
 
 /**
@@ -103,8 +134,10 @@ export const getTaxBracket = (
   income: number, 
   table: TaxBracket[]
 ): TaxBracket | null => {
+  const validIncome = validateNumber(income);
+  
   for (let bracket of table) {
-    if (income >= bracket.min && income <= bracket.max) {
+    if (validIncome >= bracket.min && validIncome <= bracket.max) {
       return bracket;
     }
   }
@@ -121,13 +154,16 @@ export const calculateMonthlyResicoISR = (
   monthlyIncome: number,
   accumulatedIncome: number
 ): number => {
-  const totalIncome = accumulatedIncome + monthlyIncome;
+  const validMonthly = validateNumber(monthlyIncome);
+  const validAccumulated = validateNumber(accumulatedIncome);
+  
+  const totalIncome = validAccumulated + validMonthly;
   const bracket = getTaxBracket(totalIncome, RESICO_TAX_TABLE_2025);
   
   if (!bracket) return 0;
   
   const totalTax = totalIncome * bracket.rate;
-  const previousTax = accumulatedIncome * bracket.rate;
+  const previousTax = validAccumulated * bracket.rate;
   
   return totalTax - previousTax;
 };
@@ -138,7 +174,8 @@ export const calculateMonthlyResicoISR = (
  * @returns true si es elegible
  */
 export const isEligibleForResico = (income: number): boolean => {
-  return income > 0 && income <= RESICO_MAX_INCOME;
+  const validIncome = validateNumber(income);
+  return validIncome > 0 && validIncome <= RESICO_MAX_INCOME;
 };
 
 /**
@@ -148,8 +185,11 @@ export const isEligibleForResico = (income: number): boolean => {
  * @returns Porcentaje
  */
 export const calculateTaxPercentage = (tax: number, income: number): number => {
-  if (income === 0) return 0;
-  return (tax / income) * 100;
+  const validTax = validateNumber(tax);
+  const validIncome = validateNumber(income);
+  
+  if (validIncome === 0) return 0;
+  return (validTax / validIncome) * 100;
 };
 
 /**
@@ -158,7 +198,8 @@ export const calculateTaxPercentage = (tax: number, income: number): number => {
  * @returns Proyección anual
  */
 export const projectAnnualISR = (monthlyIncome: number): CalculationResult => {
-  const annualIncome = monthlyIncome * 12;
+  const validMonthly = validateNumber(monthlyIncome);
+  const annualIncome = validMonthly * 12;
   return calculateResicoISR(annualIncome);
 };
 
@@ -168,8 +209,13 @@ export const projectAnnualISR = (monthlyIncome: number): CalculationResult => {
  * @returns Resultado del cálculo
  */
 export const calculateActividadEmpresarialISR = (taxableBase: number): CalculationResult => {
-  // Validación de entrada
-  if (isNaN(taxableBase) || taxableBase <= 0) {
+  // Validación robusta de entrada
+  const validBase = validateNumber(taxableBase);
+  
+  console.log('EMPRESARIAL Cálculo:', { taxableBase, validBase }); // Debug
+  
+  if (validBase <= 0) {
+    console.log('EMPRESARIAL: Base gravable inválida o cero');
     return {
       tax: 0,
       rate: 0,
@@ -179,14 +225,16 @@ export const calculateActividadEmpresarialISR = (taxableBase: number): Calculati
   }
 
   // Tabla anual simplificada (para calculadora simple)
-  // Esta es una aproximación - en avanzada se usa la tabla mensual
   const annualRate = 0.30; // Tasa aproximada del 30%
-  const tax = taxableBase * annualRate;
-
-  return {
+  const tax = validBase * annualRate;
+  
+  const result = {
     tax: tax,
     rate: annualRate * 100,
     bracket: 'Régimen General',
-    netIncome: taxableBase - tax,
+    netIncome: validBase - tax,
   };
+  
+  console.log('EMPRESARIAL: Resultado calculado', result); // Debug
+  return result;
 };

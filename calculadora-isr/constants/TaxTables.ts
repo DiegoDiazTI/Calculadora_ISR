@@ -1,38 +1,31 @@
 // constants/TaxTables.ts
-// Tablas de ISR oficiales 2025
+// ACTUALIZADO: Solo valores de RESICO corregidos según imagen oficial
 
 import { TaxBracket } from '@/types';
 
 /**
+ * Tabla de tasas RESICO 2025 - MENSUAL
+ * ⚠️ VALORES ACTUALIZADOS según tabla oficial
+ */
+export const RESICO_TAX_TABLE_2025: TaxBracket[] = [
+  { min: 0.01, max: 25000.00, rate: 0.01 },        // 1.00%
+  { min: 25000.01, max: 50000.00, rate: 0.011 },   // 1.10%
+  { min: 50000.01, max: 83333.33, rate: 0.015 },   // 1.50%
+  { min: 83333.34, max: 208333.33, rate: 0.02 },   // 2.00%
+  { min: 208333.34, max: 3500000.00, rate: 0.025 },// 2.50%
+];
+
+/**
  * Tabla de tasas RESICO 2025 - ANUAL
- * Régimen Simplificado de Confianza para Personas Físicas
- * Tasas directas sobre ingresos (sin deducciones)
+ * ⚠️ VALORES ACTUALIZADOS según tabla oficial
  */
 export const RESICO_TAX_TABLE_ANUAL_2025: TaxBracket[] = [
-  { min: 0, max: 300000, rate: 0.01 },           // 1.0%
-  { min: 300001, max: 600000, rate: 0.011 },     // 1.10%
-  { min: 600001, max: 1000000, rate: 0.015 },    // 1.50%
-  { min: 1000001, max: 2000000, rate: 0.02 },    // 2.0%
-  { min: 2000001, max: 3500000, rate: 0.025 },   // 2.5%
+  { min: 0.01, max: 300000.00, rate: 0.01 },       // 1.00%
+  { min: 300000.01, max: 600000.00, rate: 0.011 }, // 1.10%
+  { min: 600000.01, max: 1000000.00, rate: 0.015 },// 1.50%
+  { min: 1000000.01, max: 2000000.00, rate: 0.02 },// 2.00%
+  { min: 2000000.01, max: 3500000.00, rate: 0.025 },// 2.50%
 ];
-
-/**
- * Tabla de tasas RESICO 2025 - MENSUAL
- * Régimen Simplificado de Confianza para Personas Físicas
- * Tasas directas sobre ingresos (sin deducciones)
- */
-export const RESICO_TAX_TABLE_MENSUAL_2025: TaxBracket[] = [
-  { min: 0, max: 25000, rate: 0.01 },              // 1.0%
-  { min: 25000.01, max: 50000, rate: 0.011 },      // 1.10%
-  { min: 50000.01, max: 83333.33, rate: 0.015 },   // 1.50%
-  { min: 83333.34, max: 208333.33, rate: 0.02 },   // 2.0%
-  { min: 208333.34, max: 3500000, rate: 0.025 },   // 2.5%
-];
-
-/**
- * Tabla por defecto (anual) - Para mantener compatibilidad
- */
-export const RESICO_TAX_TABLE_2025 = RESICO_TAX_TABLE_ANUAL_2025;
 
 /**
  * Límite máximo de ingresos anuales para RESICO

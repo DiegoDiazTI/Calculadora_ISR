@@ -1,8 +1,7 @@
-// app/(tabs)/index.tsx
-// CORRECTO FINAL: Persona Moral con coeficiente, SIN botón ni tabla de pagos provisionales
+// app/(tabs)/index.tsx - CORREGIDO: Padding inferior aumentado
 
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text, Animated } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,10 +23,8 @@ const HEADER_BG = '#000000';
 export default function Index() {
   const navigation = useNavigation();
   
-  // Usar contexto global para régimen y tema
   const { selectedRegime, setSelectedRegime, isDarkMode, theme, toggleTheme } = useAppContext();
   
-  // Primero declaramos resicoPeriod con un estado local temporal
   const [localResicoPeriod, setLocalResicoPeriod] = useState<'mensual' | 'anual'>('anual');
   
   const {
@@ -46,7 +43,6 @@ export default function Index() {
     getTaxableBase,
   } = useCalculator(selectedRegime, localResicoPeriod);
   
-  // Sincronizar resicoPeriod del hook con el estado local
   useEffect(() => {
     if (resicoPeriod !== localResicoPeriod) {
       setLocalResicoPeriod(resicoPeriod);
@@ -80,7 +76,6 @@ export default function Index() {
   const isResico = selectedRegime === 'RESICO';
   const taxableBase = getTaxableBase();
 
-  // Calcular utilidad fiscal para preview (solo Persona Moral)
   const utilidadFiscal = isMoral && parseFloat(annualIncome.replace(/,/g, '')) > 0 && parseFloat(utilityCoefficient) > 0
     ? parseFloat(annualIncome.replace(/,/g, '')) * parseFloat(utilityCoefficient)
     : 0;
@@ -120,7 +115,6 @@ export default function Index() {
                 />
               )}
 
-              {/* RESICO - SELECTOR DE PERIODO */}
               {isResico && (
                 <PeriodSelector
                   selectedPeriod={resicoPeriod}
@@ -129,7 +123,6 @@ export default function Index() {
                 />
               )}
 
-              {/* PERSONA MORAL - INPUT DE COEFICIENTE */}
               {isMoral && (
                 <>
                   <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
@@ -173,7 +166,6 @@ export default function Index() {
                 </>
               )}
 
-              {/* Input de ingresos */}
               <Input
                 label={
                   isEmpresarial 
@@ -197,7 +189,6 @@ export default function Index() {
                 selectionColor={theme.accentLight}
               />
 
-              {/* Preview de Utilidad Fiscal - SOLO PERSONA MORAL */}
               {isMoral && utilidadFiscal > 0 && (
                 <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.accentLight }]}>
                   <View style={styles.previewHeader}>
@@ -238,7 +229,6 @@ export default function Index() {
                 </View>
               )}
 
-              {/* Input de deducciones - SOLO PARA ACTIVIDAD EMPRESARIAL */}
               {isEmpresarial && (
                 <>
                   <Input
@@ -317,7 +307,6 @@ export default function Index() {
                 </>
               )}
 
-              {/* Botón de cálculo */}
               <Button
                 title="Calcular ISR"
                 icon="calculator"
@@ -325,7 +314,6 @@ export default function Index() {
                 backgroundColor={theme.accent}
               />
 
-              {/* Resultados ISR */}
               {showResults && result && (
                 <>
                   <ResultsCard
@@ -334,7 +322,6 @@ export default function Index() {
                     regime={selectedRegime}
                     theme={theme}
                   />
-
                 </>
               )}
             </>
@@ -352,7 +339,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 20,
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 100, // ⚠️ AUMENTADO de 24 a 100 para asegurar scroll completo
   },
   infoCard: {
     borderRadius: 12,

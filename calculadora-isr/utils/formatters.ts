@@ -1,5 +1,24 @@
-// utils/formatters.ts
-// Funciones para formatear datos
+// utils/formatters.ts - VERSIÓN CORREGIDA
+// Funciones para formatear datos con mejor manejo de errores
+
+/**
+ * Valida y limpia un valor antes de formatear
+ */
+const validateValue = (value: any): number => {
+  // Si es string, intentar convertir
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^0-9.-]/g, '');
+    const num = parseFloat(cleaned);
+    return isFinite(num) ? num : 0;
+  }
+  
+  // Si es número, validar que sea finito
+  if (typeof value === 'number') {
+    return isFinite(value) ? value : 0;
+  }
+  
+  return 0;
+};
 
 /**
  * Formatea un número como moneda mexicana
@@ -8,12 +27,19 @@
  * @returns String formateado como moneda
  */
 export const formatCurrency = (value: number, includeSymbol: boolean = false): string => {
-  const formatted = value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const validValue = validateValue(value);
   
-  return includeSymbol ? `$${formatted}` : formatted;
+  try {
+    // Usar formato manual más confiable
+    const parts = Math.abs(validValue).toFixed(2).split('.');
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const formatted = `${integerPart}.${parts[1]}`;
+    
+    return includeSymbol ? `$${formatted}` : formatted;
+  } catch (error) {
+    console.error('Error formatting currency:', error);
+    return includeSymbol ? '$0.00' : '0.00';
+  }
 };
 
 /**
@@ -22,8 +48,27 @@ export const formatCurrency = (value: number, includeSymbol: boolean = false): s
  * @returns String formateado con comas
  */
 export const formatCurrencyInput = (value: string): string => {
-  const number = parseFloat(value.replace(/,/g, ''));
-  return isNaN(number) ? '0' : number.toLocaleString('en-US');
+  try {
+    // Limpiar el string
+    const cleaned = value.replace(/[^0-9]/g, '');
+    
+    if (!cleaned || cleaned === '0') {
+      return '0';
+    }
+    
+    // Convertir a número
+    const number = parseInt(cleaned, 10);
+    
+    if (!isFinite(number)) {
+      return '0';
+    }
+    
+    // Formatear con comas manualmente
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  } catch (error) {
+    console.error('Error formatting input:', error);
+    return '0';
+  }
 };
 
 /**
@@ -31,10 +76,22 @@ export const formatCurrencyInput = (value: string): string => {
  * @param value - String formateado
  * @returns Número limpio
  */
-export const parseCurrency = (value: string): number => {
-  const cleaned = value.replace(/[$,]/g, '');
-  const number = parseFloat(cleaned);
-  return isNaN(number) ? 0 : number;
+export const parseCurrency = (value: string | number): number => {
+  try {
+    // Si ya es número, validar y retornar
+    if (typeof value === 'number') {
+      return isFinite(value) ? value : 0;
+    }
+    
+    // Si es string, limpiar y convertir
+    const cleaned = value.replace(/[$,\s]/g, '');
+    const number = parseFloat(cleaned);
+    
+    return isFinite(number) ? number : 0;
+  } catch (error) {
+    console.error('Error parsing currency:', error);
+    return 0;
+  }
 };
 
 /**
@@ -44,7 +101,14 @@ export const parseCurrency = (value: string): number => {
  * @returns String con porcentaje formateado
  */
 export const formatPercentage = (value: number, decimals: number = 2): string => {
-  return `${(value * 100).toFixed(decimals)}%`;
+  try {
+    const validValue = validateValue(value);
+    const percentage = (validValue * 100).toFixed(decimals);
+    return `${percentage}%`;
+  } catch (error) {
+    console.error('Error formatting percentage:', error);
+    return '0%';
+  }
 };
 
 /**
@@ -53,11 +117,16 @@ export const formatPercentage = (value: number, decimals: number = 2): string =>
  * @returns String con fecha formateada
  */
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('es-MX', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
+  try {
+    return new Intl.DateTimeFormat('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return date.toString();
+  }
 };
 
 /**
@@ -66,11 +135,16 @@ export const formatDate = (date: Date): string => {
  * @returns String con fecha corta formateada
  */
 export const formatDateShort = (date: Date): string => {
-  return new Intl.DateTimeFormat('es-MX', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
+  try {
+    return new Intl.DateTimeFormat('es-MX', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return date.toString();
+  }
 };
 
 /**
@@ -79,11 +153,35 @@ export const formatDateShort = (date: Date): string => {
  * @returns String abreviado (ej: 1.5M, 250K)
  */
 export const abbreviateNumber = (value: number): string => {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
+  try {
+    const validValue = validateValue(value);
+    
+    if (validValue >= 1000000) {
+      return `${(validValue / 1000000).toFixed(1)}M`;
+    }
+    if (validValue >= 1000) {
+      return `${(validValue / 1000).toFixed(1)}K`;
+    }
+    return validValue.toString();
+  } catch (error) {
+    console.error('Error abbreviating number:', error);
+    return '0';
   }
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
+};
+
+/**
+ * Formatea número para display seguro
+ * @param value - Valor a formatear
+ * @returns String seguro para display
+ */
+export const safeNumberFormat = (value: any): string => {
+  try {
+    const validValue = validateValue(value);
+    
+    // Formato manual sin locale
+    return validValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  } catch (error) {
+    console.error('Error in safe number format:', error);
+    return '0.00';
   }
-  return value.toString();
 };
