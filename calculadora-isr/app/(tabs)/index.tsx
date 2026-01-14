@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { ResultsCard } from '@/components/calculator/ResultsCard';
 import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard';
 import { PeriodSelector } from '@/components/calculator/PeriodSelector';
+import { MonthSelector } from '@/components/calculator/MonthSelector';
 import { AllTaxTables } from '@/components/calculator/AllTaxTables';
 import { useTheme } from '@/hooks/useTheme';
 import { useCalculator } from '@/hooks/useCalculator';
@@ -32,12 +33,16 @@ export default function Index() {
     deductions,
     utilityCoefficient,
     resicoPeriod,
+    selectedMonth,
+    empresarialPeriod,
     showResults,
     result,
     handleIncomeChange,
     handleDeductionsChange,
     handleCoefficientChange,
     handleResicoPeriodChange,
+    handleEmpresarialMonthChange,
+    handleEmpresarialPeriodChange,
     calculateISR,
     reset,
     getTaxableBase,
@@ -123,6 +128,23 @@ export default function Index() {
                 />
               )}
 
+              {isEmpresarial && (
+                <>
+                  <PeriodSelector
+                    selectedPeriod={empresarialPeriod}
+                    onSelectPeriod={handleEmpresarialPeriodChange}
+                    theme={theme}
+                  />
+                  {empresarialPeriod === 'mensual' && (
+                    <MonthSelector
+                      selectedMonth={selectedMonth}
+                      onSelectMonth={handleEmpresarialMonthChange}
+                      theme={theme}
+                    />
+                  )}
+                </>
+              )}
+
               {isMoral && (
                 <>
                   <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
@@ -133,8 +155,15 @@ export default function Index() {
                       </Text>
                     </View>
                     <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                      Es el resultado de dividir la utilidad fiscal entre los ingresos nominales del ejercicio inmediato anterior. 
-                      Se usa para calcular la utilidad fiscal estimada del año actual.
+                      Suma todas tus deducciones autorizadas acumuladas al mes seleccionado:
+
+                      - Compras y costos de ventas{'\n'}
+                      - Gastos de operacion{'\n'}
+                      - Sueldos y salarios{'\n'}
+                      - Rentas del local{'\n'}
+                      - Depreciaciones{'\n'}
+                      - Intereses pagados{'\n'}
+                      - Otros gastos deducibles
                     </Text>
                   </View>
 
@@ -254,14 +283,15 @@ export default function Index() {
                       </Text>
                     </View>
                     <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                      Suma todas tus deducciones autorizadas del año:{'\n'}
-                      • Compras y costos de ventas{'\n'}
-                      • Gastos de operación{'\n'}
-                      • Sueldos y salarios{'\n'}
-                      • Rentas del local{'\n'}
-                      • Depreciaciones{'\n'}
-                      • Intereses pagados{'\n'}
-                      • Otros gastos deducibles
+                      Suma todas tus deducciones autorizadas acumuladas al mes seleccionado:
+
+                      - Compras y costos de ventas{'\n'}
+                      - Gastos de operacion{'\n'}
+                      - Sueldos y salarios{'\n'}
+                      - Rentas del local{'\n'}
+                      - Depreciaciones{'\n'}
+                      - Intereses pagados{'\n'}
+                      - Otros gastos deducibles
                     </Text>
                   </View>
 

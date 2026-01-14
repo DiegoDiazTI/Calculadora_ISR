@@ -23,6 +23,7 @@ export const useAdvancedCalculator = (
   const [result, setResult] = useState<AdvancedCalculationResult | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number>(11); // Diciembre por defecto
   const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod); // Periodo RESICO
+  const [empresarialPeriod, setEmpresarialPeriod] = useState<'mensual' | 'anual'>('mensual'); // Periodo Empresarial
 
   /**
    * Limpia resultados cuando cambia el régimen desde el contexto
@@ -61,8 +62,7 @@ export const useAdvancedCalculator = (
    * Maneja cambios en campos de RESICO
    */
   const handleResicoChange = (field: keyof typeof resicoData, text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    const formatted = cleaned ? formatCurrencyInput(cleaned) : '';
+    const formatted = formatCurrencyInput(text);
     
     setResicoData((prev) => ({
       ...prev,
@@ -75,8 +75,7 @@ export const useAdvancedCalculator = (
    * Maneja cambios en campos de Actividad Empresarial
    */
   const handleEmpresarialChange = (field: keyof typeof empresarialData, text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    const formatted = cleaned ? formatCurrencyInput(cleaned) : '';
+    const formatted = formatCurrencyInput(text);
     
     setEmpresarialData((prev) => ({
       ...prev,
@@ -89,8 +88,7 @@ export const useAdvancedCalculator = (
    * Maneja cambios en campos de Persona Moral
    */
   const handleMoralChange = (field: keyof typeof moralData, text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    const formatted = cleaned ? formatCurrencyInput(cleaned) : '';
+    const formatted = formatCurrencyInput(text);
     
     setMoralData((prev) => ({
       ...prev,
@@ -104,6 +102,17 @@ export const useAdvancedCalculator = (
    */
   const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de periodo para Actividad Empresarial
+   */
+  const handleEmpresarialPeriodChange = (period: 'mensual' | 'anual') => {
+    setEmpresarialPeriod(period);
+    if (period === 'anual') {
+      setSelectedMonth(11);
+    }
     setShowResults(false);
   };
 
@@ -137,7 +146,8 @@ export const useAdvancedCalculator = (
         withheldISR: parseCurrency(empresarialData.withheldISR),
       };
       // Pasar el mes seleccionado al cálculo
-      calculationResult = calculateAdvancedEmpresarial(data, selectedMonth + 1);
+      const monthForCalc = empresarialPeriod === 'anual' ? 12 : selectedMonth + 1;
+      calculationResult = calculateAdvancedEmpresarial(data, monthForCalc);
     } else if (selectedRegime === 'MORAL') {
       const data: MoralAdvancedData = {
         totalIncome: parseCurrency(moralData.totalIncome),
@@ -217,11 +227,13 @@ export const useAdvancedCalculator = (
     moralData,
     selectedMonth,
     resicoPeriod,
+    empresarialPeriod,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
     handleMonthChange,
     handleResicoPeriodChange,
+    handleEmpresarialPeriodChange,
     calculateISR,
     reset,
     getTotals,

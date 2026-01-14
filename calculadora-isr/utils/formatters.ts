@@ -47,27 +47,36 @@ export const formatCurrency = (value: number, includeSymbol: boolean = false): s
  * @param value - String con el valor
  * @returns String formateado con comas
  */
-export const formatCurrencyInput = (value: string): string => {
+export const formatCurrencyInput = (value: string, decimals: number = 2): string => {
   try {
-    // Limpiar el string
-    const cleaned = value.replace(/[^0-9]/g, '');
-    
-    if (!cleaned || cleaned === '0') {
-      return '0';
+    // Limpiar el string (permitir punto decimal)
+    const cleaned = value.replace(/[^0-9.]/g, '');
+
+    if (!cleaned) {
+      return '';
     }
-    
-    // Convertir a número
-    const number = parseInt(cleaned, 10);
-    
-    if (!isFinite(number)) {
-      return '0';
+
+    const dotIndex = cleaned.indexOf('.');
+    let integerPart = cleaned;
+    let decimalPart = '';
+
+    if (dotIndex !== -1) {
+      integerPart = cleaned.slice(0, dotIndex);
+      decimalPart = cleaned.slice(dotIndex + 1).replace(/\./g, '');
     }
-    
-    // Formatear con comas manualmente
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    const normalizedInt = integerPart.replace(/^0+(?=\d)/, '');
+    const formattedInt = (normalizedInt || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    if (dotIndex !== -1) {
+      const trimmedDecimal = decimals >= 0 ? decimalPart.slice(0, decimals) : decimalPart;
+      return `${formattedInt}.${trimmedDecimal}`;
+    }
+
+    return formattedInt;
   } catch (error) {
     console.error('Error formatting input:', error);
-    return '0';
+    return '';
   }
 };
 

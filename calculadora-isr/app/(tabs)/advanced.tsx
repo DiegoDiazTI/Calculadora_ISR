@@ -56,11 +56,13 @@ export default function Advanced() {
     moralData,
     selectedMonth,
     resicoPeriod,
+    empresarialPeriod,
     handleResicoChange,
     handleEmpresarialChange,
     handleMoralChange,
     handleMonthChange,
     handleResicoPeriodChange,
+    handleEmpresarialPeriodChange,
     calculateISR,
     getTotals,
   } = useAdvancedCalculator(selectedRegime, localResicoPeriod);
@@ -301,11 +303,18 @@ export default function Advanced() {
             {/* ========== ACTIVIDAD EMPRESARIAL ========== */}
             {selectedRegime === 'EMPRESARIAL' && (
               <>
-                <MonthSelector
-                  selectedMonth={selectedMonth}
-                  onSelectMonth={handleMonthChange}
+                <PeriodSelector
+                  selectedPeriod={empresarialPeriod}
+                  onSelectPeriod={handleEmpresarialPeriodChange}
                   theme={theme}
                 />
+                {empresarialPeriod === 'mensual' && (
+                  <MonthSelector
+                    selectedMonth={selectedMonth}
+                    onSelectMonth={handleMonthChange}
+                    theme={theme}
+                  />
+                )}
 
                 {/* TABLA ACTIVIDAD EMPRESARIAL */}
                 <View style={[styles.tableCard, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>

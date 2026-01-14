@@ -6,7 +6,9 @@ import {
   RESICO_TAX_TABLE_ANUAL_2025,
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
-  PERSONA_MORAL_RATE 
+  PERSONA_MORAL_RATE,
+  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
+  TaxBracketWithQuota
 } from '@/constants/TaxTables';
 
 /**
@@ -22,6 +24,18 @@ const validateNumber = (value: number): number => {
   }
   
   return num;
+};
+
+/**
+ * Obtiene la tabla anual de Actividad Empresarial usando el mes indicado
+ */
+const getActividadEmpresarialTableForMonth = (month: number): TaxBracketWithQuota[] => {
+  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map((bracket: TaxBracketWithQuota) => ({
+    ...bracket,
+    min: bracket.min * month,
+    max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * month,
+    fixedFee: bracket.fixedFee * month,
+  }));
 };
 
 /**
@@ -204,15 +218,19 @@ export const projectAnnualISR = (monthlyIncome: number): CalculationResult => {
 };
 
 /**
- * Calcula el ISR para Actividad Empresarial (tabla anual)
+ * Calcula el ISR para Actividad Empresarial (tabla por mes acumulado)
  * @param taxableBase - Base gravable (ingresos - deducciones)
+ * @param month - Mes acumulado (1-12)
  * @returns Resultado del cálculo
  */
-export const calculateActividadEmpresarialISR = (taxableBase: number): CalculationResult => {
+export const calculateActividadEmpresarialISR = (
+  taxableBase: number,
+  month: number = 12
+): CalculationResult => {
   // Validación robusta de entrada
   const validBase = validateNumber(taxableBase);
   
-  console.log('EMPRESARIAL Cálculo:', { taxableBase, validBase }); // Debug
+  console.log('EMPRESARIAL C?lculo:', { taxableBase, validBase, month }); // Debug
   
   if (validBase <= 0) {
     console.log('EMPRESARIAL: Base gravable inválida o cero');
@@ -224,17 +242,29 @@ export const calculateActividadEmpresarialISR = (taxableBase: number): Calculati
     };
   }
 
-  // Tabla anual simplificada (para calculadora simple)
-  const annualRate = 0.30; // Tasa aproximada del 30%
-  const tax = validBase * annualRate;
-  
+  // Tabla por mes seleccionado (acumulado) para calculadora simple
+  const annualTable = getActividadEmpresarialTableForMonth(month);
+  let tax = 0;
+  let rate = 0;
+  let bracketString = 'N/A';
+
+  for (let bracket of annualTable) {
+    if (validBase >= bracket.min && validBase <= bracket.max) {
+      const excess = validBase - bracket.min;
+      tax = bracket.fixedFee + (excess * bracket.rate);
+      rate = bracket.rate * 100;
+      bracketString = `$${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2 })} - $${bracket.max === 999999999.99 ? 'En adelante' : bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      break;
+    }
+  }
+
   const result = {
-    tax: tax,
-    rate: annualRate * 100,
-    bracket: 'Régimen General',
+    tax,
+    rate,
+    bracket: bracketString,
     netIncome: validBase - tax,
   };
-  
+
   console.log('EMPRESARIAL: Resultado calculado', result); // Debug
   return result;
 };

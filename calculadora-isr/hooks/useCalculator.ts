@@ -23,6 +23,11 @@ export const useCalculator = (
   
   // Estado para RESICO - Periodo de cálculo (mensual/anual)
   const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod);
+  // Estado para Actividad Empresarial - Mes seleccionado (0-11)
+  const [selectedMonth, setSelectedMonth] = useState<number>(11);
+  // Estado para Actividad Empresarial - Periodo de cálculo (mensual/anual)
+  const [empresarialPeriod, setEmpresarialPeriod] = useState<'mensual' | 'anual'>('mensual');
+
   
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -47,12 +52,8 @@ export const useCalculator = (
    * Maneja el cambio de ingreso con formato
    */
   const handleIncomeChange = (text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    if (cleaned) {
-      setAnnualIncome(formatCurrencyInput(cleaned));
-    } else {
-      setAnnualIncome('');
-    }
+    const formatted = formatCurrencyInput(text);
+    setAnnualIncome(formatted);
     setShowResults(false);
   };
 
@@ -60,12 +61,8 @@ export const useCalculator = (
    * Maneja el cambio de deducciones
    */
   const handleDeductionsChange = (text: string) => {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    if (cleaned) {
-      setDeductions(formatCurrencyInput(cleaned));
-    } else {
-      setDeductions('');
-    }
+    const formatted = formatCurrencyInput(text);
+    setDeductions(formatted);
     setShowResults(false);
   };
 
@@ -90,6 +87,25 @@ export const useCalculator = (
    */
   const handleResicoPeriodChange = (period: 'mensual' | 'anual') => {
     setResicoPeriod(period);
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de mes para Actividad Empresarial
+   */
+  const handleEmpresarialMonthChange = (month: number) => {
+    setSelectedMonth(month);
+    setShowResults(false);
+  };
+
+  /**
+   * Maneja el cambio de periodo para Actividad Empresarial
+   */
+  const handleEmpresarialPeriodChange = (period: 'mensual' | 'anual') => {
+    setEmpresarialPeriod(period);
+    if (period === 'anual') {
+      setSelectedMonth(11);
+    }
     setShowResults(false);
   };
 
@@ -156,7 +172,8 @@ export const useCalculator = (
           netIncome: 0,
         };
       } else {
-        calculationResult = calculateActividadEmpresarialISR(taxableBase);
+        const monthForCalc = empresarialPeriod === 'anual' ? 12 : selectedMonth + 1;
+        calculationResult = calculateActividadEmpresarialISR(taxableBase, monthForCalc);
       }
       console.log('🟡 Resultado EMPRESARIAL:', calculationResult);
     } else {
@@ -189,6 +206,7 @@ export const useCalculator = (
     setAnnualIncome('');
     setDeductions('0');
     setUtilityCoefficient('0.2360');
+    setSelectedMonth(11);
     setShowResults(false);
     setResult(null);
   };
@@ -199,12 +217,16 @@ export const useCalculator = (
     deductions,
     utilityCoefficient,
     resicoPeriod,
+    selectedMonth,
+    empresarialPeriod,
     showResults,
     result,
     handleIncomeChange,
     handleDeductionsChange,
     handleCoefficientChange,
     handleResicoPeriodChange,
+    handleEmpresarialMonthChange,
+    handleEmpresarialPeriodChange,
     calculateISR,
     reset,
     getTaxableBase,

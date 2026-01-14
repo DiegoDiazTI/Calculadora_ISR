@@ -2,7 +2,7 @@
 // Header full width en cualquier plataforma, con fondo oscuro fijo
 
 import React from 'react';
-import { View, StyleSheet, Platform, Image, SafeAreaView, StatusBar } from 'react-native';
+import { View, StyleSheet, Platform, SafeAreaView, StatusBar } from 'react-native';
 import { ThemeColors } from '@/types';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { DARK_THEME } from '@/constants/Theme';
@@ -28,15 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     <SafeAreaView style={[styles.safeArea, { backgroundColor: HEADER_BG, paddingTop: topInset }]}>
       <View style={styles.headerContainer}>
         {/* Logo */}
-        {Platform.OS === 'web' ? (
-          <Image
-            source={require('../../assets/Logo/logo_diego.svg')}
-            style={styles.logoWeb}
-            resizeMode="contain"
-          />
-        ) : (
-          <LogoDiego width={110} height={30} />
-        )}
+        <LogoDiego width={110} height={30} />
 
         {/* Botón de tema */}
         <ThemeToggle
@@ -73,8 +65,4 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
 
-  logoWeb: {
-    width: 110,
-    height: 30,
-  },
 });

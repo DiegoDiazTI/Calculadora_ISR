@@ -3,11 +3,13 @@
 
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const activeBg = isDark ? '#3a3233' : '#e6f4f3';
+  const activeShadow = isDark ? '#000000' : '#0f172a';
 
   return (
     <Tabs
@@ -26,6 +28,23 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
+        },
+        tabBarButton: (props) => {
+          const isFocused = props.accessibilityState?.selected;
+          return (
+            <TouchableOpacity
+              {...props}
+              style={[
+                props.style,
+                styles.tabButton,
+                isFocused && styles.tabButtonActive,
+                isFocused && { backgroundColor: activeBg, shadowColor: activeShadow },
+              ]}
+              activeOpacity={0.85}
+            >
+              {props.children}
+            </TouchableOpacity>
+          );
         },
       }}
     >
@@ -52,3 +71,21 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  tabButtonActive: {
+    transform: [{ translateY: -3 }],
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+});
