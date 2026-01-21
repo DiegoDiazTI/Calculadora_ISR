@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
 
@@ -93,6 +94,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const appVersion =
+    Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0';
 
   // Animación de float para el logo
   useEffect(() => {
@@ -229,7 +232,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             </TouchableOpacity>
           </Animated.View>
           
-          <Text style={styles.versionText}>Versión 1.0 • Díaz Lara</Text>
+          <Text style={styles.versionText}>
+            Versión {appVersion} • Díaz Lara
+          </Text>
           
           {/* Bottom indicator (iPhone home indicator) */}
         </View>

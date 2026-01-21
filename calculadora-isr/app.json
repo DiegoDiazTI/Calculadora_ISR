@@ -3,7 +3,6 @@
     "name": "Calculadora Fiscal",
     "slug": "calculadora-isr-mexico",
     "version": "1.1.1",
-
     "runtimeVersion": { "policy": "appVersion" },
     "updates": { "url": "https://u.expo.dev/2b569166-2a26-4963-8059-66ae626a1252" },
     "orientation": "portrait",
@@ -16,21 +15,19 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F172A"
     },
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.calculadorafiscal",
-      "buildNumber": "4",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
+"ios": {
+  "supportsTablet": true,
+  "bundleIdentifier": "com.calculadoradeisr",
+  "buildNumber": "6",
+  "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
+},
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0F172A"
       },
       "package": "com.calculadorafiscal",
-      "versionCode": 3,
+      "versionCode": 4,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
