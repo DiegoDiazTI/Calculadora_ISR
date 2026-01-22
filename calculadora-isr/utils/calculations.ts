@@ -64,18 +64,21 @@ export const calculateResicoISR = (
   }
 
   // Seleccionar tabla según periodo
-  const table = RESICO_TAX_TABLE_ANUAL_2025;
+  const table = period === 'mensual'
+    ? RESICO_TAX_TABLE_2025
+    : RESICO_TAX_TABLE_ANUAL_2025;
 
   console.log('RESICO: Usando tabla', period, 'con', table.length, 'tramos');
 
-  // Verificar si excede el límite (solo para anual)
-  if (period === 'anual' && validIncome > RESICO_MAX_INCOME) {
-    console.log('RESICO: Excede límite', RESICO_MAX_INCOME);
+  // Si excede el limite del ultimo tramo, usar la tasa maxima
+  const maxBracket = table[table.length - 1];
+  if (validIncome > maxBracket.max) {
+    const tax = validIncome * maxBracket.rate;
     return {
-      tax: 0,
-      rate: 0,
-      bracket: 'Excede límite RESICO',
-      netIncome: validIncome,
+      tax,
+      rate: maxBracket.rate * 100,
+      bracket: `Mas de $${Math.floor(maxBracket.max).toLocaleString('en-US')}`,
+      netIncome: validIncome - tax,
     };
   }
 

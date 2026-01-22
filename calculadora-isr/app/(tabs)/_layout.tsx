@@ -31,11 +31,20 @@ export default function TabLayout() {
         },
         tabBarButton: (props) => {
           const isFocused = props.accessibilityState?.selected;
+          const { delayLongPress, disabled, ...restProps } = props;
+
+          // Remove any props with null values (especially event handlers)
+          const filteredProps = Object.fromEntries(
+            Object.entries(restProps).filter(([_, v]) => v !== null)
+          );
+
           return (
             <TouchableOpacity
-              {...props}
+              {...filteredProps}
+              disabled={disabled ?? false}
+              delayLongPress={delayLongPress ?? undefined}
               style={[
-                props.style,
+                restProps.style,
                 styles.tabButton,
                 isFocused && styles.tabButtonActive,
                 isFocused && { backgroundColor: activeBg, shadowColor: activeShadow },

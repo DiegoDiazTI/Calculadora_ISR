@@ -119,7 +119,7 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
       {/* Tramo */}
       <View style={[styles.row, { borderTopColor: theme.border }]}>
         <Text style={[styles.label, { color: theme.textSecondary }]}>
-          {regime === 'RESICO' ? 'Tramo aplicado:' : 'Régimen:'}
+          Regimen:
         </Text>
         <Text style={[styles.value, { color: theme.text }]}>
           {result.bracket || 'N/A'}

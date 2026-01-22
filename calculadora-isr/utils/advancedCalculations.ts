@@ -4,7 +4,6 @@
 import { CalculationResult, TaxBracket } from '@/types';
 import { 
   RESICO_TAX_TABLE_ANUAL_2025,
-  RESICO_TAX_TABLE_MENSUAL_2025,
   RESICO_TAX_TABLE_2025, 
   RESICO_MAX_INCOME, 
   PERSONA_MORAL_RATE,
@@ -62,7 +61,7 @@ export const calculateAdvancedResico = (
 
   // Seleccionar tabla según periodo
   const table = period === 'mensual' 
-    ? RESICO_TAX_TABLE_MENSUAL_2025 
+    ? RESICO_TAX_TABLE_2025 
     : RESICO_TAX_TABLE_ANUAL_2025;
 
   let bracket: TaxBracket | null = null;
