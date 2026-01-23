@@ -1,5 +1,5 @@
-// hooks/useCalculator.ts - VERSIÓN CORREGIDA
-// CORRECTO FINAL: Resetea resultados cuando cambia el régimen
+// hooks/useCalculator.ts - VERSIÓN CON PLACEHOLDERS
+// Los inputs inician vacíos, solo muestran ejemplos como placeholders
 
 import { useState, useEffect } from 'react';
 import { RegimeType, CalculationResult } from '@/types';
@@ -15,11 +15,9 @@ export const useCalculator = (
   initialPeriod: 'mensual' | 'anual' = 'anual'
 ) => {
   const [selectedRegime] = useState<RegimeType>(initialRegime);
-  const [annualIncome, setAnnualIncome] = useState('1,250,000');
-  const [deductions, setDeductions] = useState('0');
-  
-  // Estado para Persona Moral - Coeficiente de Utilidad
-  const [utilityCoefficient, setUtilityCoefficient] = useState('0.2360');
+const [annualIncome, setAnnualIncome] = useState('');
+const [deductions, setDeductions] = useState('');
+const [utilityCoefficient, setUtilityCoefficient] = useState('');
   
   // Estado para RESICO - Periodo de cálculo (mensual/anual)
   const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod);
@@ -36,14 +34,12 @@ export const useCalculator = (
    * ⚠️ CRÍTICO: Limpia resultados cuando cambia el régimen desde el contexto
    */
   useEffect(() => {
-
-    
     setShowResults(false);
     setResult(null);
     
     // Resetear deducciones si no es empresarial
     if (initialRegime !== 'EMPRESARIAL') {
-      setDeductions('0');
+      setDeductions('');
     }
     
   }, [initialRegime]);
@@ -168,7 +164,7 @@ export const useCalculator = (
         calculationResult = {
           tax: 0,
           rate: 0,
-          bracket: 'Base gravable negativa o cero',
+          bracket: 'N/A',
           netIncome: 0,
         };
       } else {
@@ -204,15 +200,15 @@ export const useCalculator = (
    */
   const reset = () => {
     setAnnualIncome('');
-    setDeductions('0');
-    setUtilityCoefficient('0.2360');
+    setDeductions('');
+    setUtilityCoefficient('');
     setSelectedMonth(11);
     setShowResults(false);
     setResult(null);
   };
 
   return {
-    selectedRegime: initialRegime, // ⚠️ Retornar el régimen ACTUAL
+    selectedRegime: initialRegime,
     annualIncome,
     deductions,
     utilityCoefficient,

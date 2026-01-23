@@ -118,7 +118,9 @@ export const AdvancedResultsCard: React.FC<AdvancedResultsCardProps> = ({
           <MaterialCommunityIcons name="percent" size={18} color={theme.textSecondary} />
           <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Tasa efectiva</Text>
           <Text style={[styles.infoValue, { color: theme.text }]}>
-            {((result.grossISR / result.grossIncome) * 100).toFixed(2)}%
+            {result.grossIncome > 0
+              ? `${((result.grossISR / result.grossIncome) * 100).toFixed(2)}%`
+              : 'N/A'}
           </Text>
         </View>
 

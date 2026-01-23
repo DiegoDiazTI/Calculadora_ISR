@@ -35,27 +35,27 @@ export const useAdvancedCalculator = (
 
   // Estados para RESICO
   const [resicoData, setResicoData] = useState({
-    totalIncome: '1,250,000',
-    withheldISR: '15,625',
-    provisionalPayments: '0',
-    withheldIVA: '0',
+    totalIncome: '',
+    withheldISR: '',
+    provisionalPayments: '',
+    withheldIVA: '',
   });
 
   // Estados para Actividad Empresarial
   const [empresarialData, setEmpresarialData] = useState({
-    totalIncome: '3,000,000',
-    totalDeductions: '2,160,000',
-    provisionalPayments: '0',
-    withheldISR: '0',
+    totalIncome: '',
+    totalDeductions: '',
+    provisionalPayments: '',
+    withheldISR: '',
   });
 
   // Estados para Persona Moral
   const [moralData, setMoralData] = useState({
-    totalIncome: '5,000,000',
-    totalDeductions: '3,820,000',
-    previousLosses: '0',
-    provisionalPayments: '0',
-    withheldISR: '0',
+    totalIncome: '',
+    totalDeductions: '',
+    previousLosses: '',
+    provisionalPayments: '',
+    withheldISR: '',
   });
 
   /**

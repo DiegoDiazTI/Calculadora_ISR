@@ -1,4 +1,5 @@
-// app/(tabs)/index.tsx - CORREGIDO: Padding inferior aumentado
+// app/(tabs)/index.tsx - CON PLACEHOLDERS INFORMATIVOS
+// Los inputs muestran ejemplos como placeholder, no como valores predeterminados
 
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text } from 'react-native';
@@ -155,15 +156,7 @@ export default function Index() {
                       </Text>
                     </View>
                     <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                      Suma todas tus deducciones autorizadas acumuladas al mes seleccionado:
-
-                      - Compras y costos de ventas{'\n'}
-                      - Gastos de operacion{'\n'}
-                      - Sueldos y salarios{'\n'}
-                      - Rentas del local{'\n'}
-                      - Depreciaciones{'\n'}
-                      - Intereses pagados{'\n'}
-                      - Otros gastos deducibles
+                      El coeficiente de utilidad se obtiene de la declaración anual del ejercicio anterior.
                     </Text>
                   </View>
 
@@ -209,7 +202,15 @@ export default function Index() {
                 value={annualIncome}
                 onChangeText={handleIncomeChange}
                 keyboardType="numeric"
-                placeholder="0"
+                placeholder={
+                  isEmpresarial 
+                    ? "3,000,000" 
+                    : isMoral
+                    ? "5,000,000"
+                    : isResico
+                    ? (resicoPeriod === 'mensual' ? "104,166" : "1,250,000")
+                    : "1,250,000"
+                }
                 backgroundColor={theme.inputBg}
                 borderColor={theme.inputBorder}
                 textColor={theme.text}
@@ -266,7 +267,7 @@ export default function Index() {
                     value={deductions}
                     onChangeText={handleDeductionsChange}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="2,160,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 20,
     paddingHorizontal: 16,
-    paddingBottom: 100, // ⚠️ AUMENTADO de 24 a 100 para asegurar scroll completo
+    paddingBottom: 100,
   },
   infoCard: {
     borderRadius: 12,

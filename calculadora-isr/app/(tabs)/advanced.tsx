@@ -253,7 +253,7 @@ export default function Advanced() {
                   value={resicoData.totalIncome}
                   onChangeText={(text) => handleResicoChange('totalIncome', text)}
                   keyboardType="numeric"
-                  placeholder="0"
+                  placeholder="1,000"
                   backgroundColor={theme.inputBg}
                   borderColor={theme.inputBorder}
                   textColor={theme.text}
@@ -273,7 +273,7 @@ export default function Advanced() {
                     value={resicoData.withheldISR}
                     onChangeText={(text) => handleResicoChange('withheldISR', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -288,7 +288,7 @@ export default function Advanced() {
                     value={resicoData.provisionalPayments}
                     onChangeText={(text) => handleResicoChange('provisionalPayments', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -417,7 +417,7 @@ export default function Advanced() {
                   value={empresarialData.totalIncome}
                   onChangeText={(text) => handleEmpresarialChange('totalIncome', text)}
                   keyboardType="numeric"
-                  placeholder="0"
+                  placeholder="1,000"
                   backgroundColor={theme.inputBg}
                   borderColor={theme.inputBorder}
                   textColor={theme.text}
@@ -432,7 +432,7 @@ export default function Advanced() {
                   value={empresarialData.totalDeductions}
                   onChangeText={(text) => handleEmpresarialChange('totalDeductions', text)}
                   keyboardType="numeric"
-                  placeholder="0"
+                  placeholder="1,000"
                   backgroundColor={theme.inputBg}
                   borderColor={theme.inputBorder}
                   textColor={theme.text}
@@ -475,7 +475,7 @@ export default function Advanced() {
                     value={empresarialData.provisionalPayments}
                     onChangeText={(text) => handleEmpresarialChange('provisionalPayments', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -490,7 +490,7 @@ export default function Advanced() {
                     value={empresarialData.withheldISR}
                     onChangeText={(text) => handleEmpresarialChange('withheldISR', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -560,7 +560,7 @@ export default function Advanced() {
                   value={moralData.totalIncome}
                   onChangeText={(text) => handleMoralChange('totalIncome', text)}
                   keyboardType="numeric"
-                  placeholder="0"
+                  placeholder="1,000"
                   backgroundColor={theme.inputBg}
                   borderColor={theme.inputBorder}
                   textColor={theme.text}
@@ -575,7 +575,7 @@ export default function Advanced() {
                   value={moralData.totalDeductions}
                   onChangeText={(text) => handleMoralChange('totalDeductions', text)}
                   keyboardType="numeric"
-                  placeholder="0"
+                  placeholder="1,000"
                   backgroundColor={theme.inputBg}
                   borderColor={theme.inputBorder}
                   textColor={theme.text}
@@ -619,7 +619,7 @@ export default function Advanced() {
                     value={moralData.previousLosses}
                     onChangeText={(text) => handleMoralChange('previousLosses', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -634,7 +634,7 @@ export default function Advanced() {
                     value={moralData.provisionalPayments}
                     onChangeText={(text) => handleMoralChange('provisionalPayments', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
@@ -649,7 +649,7 @@ export default function Advanced() {
                     value={moralData.withheldISR}
                     onChangeText={(text) => handleMoralChange('withheldISR', text)}
                     keyboardType="numeric"
-                    placeholder="0"
+                    placeholder="1,000"
                     backgroundColor={theme.inputBg}
                     borderColor={theme.inputBorder}
                     textColor={theme.text}
