@@ -3,7 +3,7 @@
     "name": "Calculadora Fiscal",
     "slug": "calculadora-isr-mexico",
     "version": "1.1.1",
-    "runtimeVersion": { "policy": "appVersion" },
+    "runtimeVersion": "1.1.1",
     "updates": { "url": "https://u.expo.dev/2b569166-2a26-4963-8059-66ae626a1252" },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -18,7 +18,7 @@
 "ios": {
   "supportsTablet": true,
   "bundleIdentifier": "com.calculadoradeisr",
-  "buildNumber": "6",
+  "buildNumber": "10",
   "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
 },
     "android": {
