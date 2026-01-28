@@ -1,25 +1,26 @@
 // app/_layout.tsx
-// Layout principal de la aplicación con Splash Screen y AppContext
+// Layout principal de la aplicación con Splash Screen, GestureHandlerRootView y AppContext
 
 import { Stack } from 'expo-router';
 import { useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { AppProvider } from '@/contexts/AppContext';
 
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
 
-  // Mostrar Splash Screen al iniciar
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
-
-  // Después del splash, mostrar la app normal envuelta en AppProvider
   return (
-    <AppProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </AppProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {showSplash ? (
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      ) : (
+        <AppProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </AppProvider>
+      )}
+    </GestureHandlerRootView>
   );
 }

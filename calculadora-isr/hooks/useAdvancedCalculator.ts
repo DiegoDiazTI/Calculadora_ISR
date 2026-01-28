@@ -1,5 +1,5 @@
-// hooks/useAdvancedCalculator.ts
-// ACTUALIZADO: Soporte para selección de mes en Actividad Empresarial
+// hooks/useAdvancedCalculator.ts - VERSIÓN FINAL
+// ✅ FIX: Resetea todos los inputs al cambiar de régimen
 
 import { useState, useEffect } from 'react';
 import { RegimeType } from '@/types';
@@ -18,22 +18,13 @@ export const useAdvancedCalculator = (
   initialRegime: RegimeType = 'RESICO',
   initialPeriod: 'mensual' | 'anual' = 'anual'
 ) => {
-  const [selectedRegime] = useState<RegimeType>(initialRegime);
+  const [selectedRegime, setSelectedRegime] = useState<RegimeType>(initialRegime);
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<AdvancedCalculationResult | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number>(11); // Diciembre por defecto
-  const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod); // Periodo RESICO
-  const [empresarialPeriod, setEmpresarialPeriod] = useState<'mensual' | 'anual'>('mensual'); // Periodo Empresarial
+  const [selectedMonth, setSelectedMonth] = useState<number>(11);
+  const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod);
+  const [empresarialPeriod, setEmpresarialPeriod] = useState<'mensual' | 'anual'>('mensual');
 
-  /**
-   * Limpia resultados cuando cambia el régimen desde el contexto
-   */
-  useEffect(() => {
-    setShowResults(false);
-    setResult(null);
-  }, [initialRegime]);
-
-  // Estados para RESICO
   const [resicoData, setResicoData] = useState({
     totalIncome: '',
     withheldISR: '',
@@ -41,7 +32,6 @@ export const useAdvancedCalculator = (
     withheldIVA: '',
   });
 
-  // Estados para Actividad Empresarial
   const [empresarialData, setEmpresarialData] = useState({
     totalIncome: '',
     totalDeductions: '',
@@ -49,7 +39,6 @@ export const useAdvancedCalculator = (
     withheldISR: '',
   });
 
-  // Estados para Persona Moral
   const [moralData, setMoralData] = useState({
     totalIncome: '',
     totalDeductions: '',
@@ -57,6 +46,42 @@ export const useAdvancedCalculator = (
     provisionalPayments: '',
     withheldISR: '',
   });
+
+  /**
+   * ✅ SOLUCIÓN: Sincroniza régimen y RESETEA todos los inputs al cambiar
+   */
+  useEffect(() => {
+    setSelectedRegime(initialRegime);
+    
+    // Limpiar resultados
+    setShowResults(false);
+    setResult(null);
+    
+    // ✅ NUEVO: Resetear TODOS los inputs al cambiar de régimen
+    setResicoData({
+      totalIncome: '',
+      withheldISR: '',
+      provisionalPayments: '',
+      withheldIVA: '',
+    });
+    
+    setEmpresarialData({
+      totalIncome: '',
+      totalDeductions: '',
+      provisionalPayments: '',
+      withheldISR: '',
+    });
+    
+    setMoralData({
+      totalIncome: '',
+      totalDeductions: '',
+      previousLosses: '',
+      provisionalPayments: '',
+      withheldISR: '',
+    });
+    
+    console.log('🔄 Régimen cambiado a:', initialRegime, '- Todos los inputs reseteados');
+  }, [initialRegime]);
 
   /**
    * Maneja cambios en campos de RESICO
@@ -128,27 +153,52 @@ export const useAdvancedCalculator = (
    * Calcula el ISR según el régimen seleccionado
    */
   const calculateISR = () => {
+    console.log('=== CALCULANDO ISR ===');
+    console.log('Régimen seleccionado:', selectedRegime);
+    console.log('Mes seleccionado:', selectedMonth);
+
+    // Limpiar resultado anterior antes de calcular
+    setShowResults(false);
+    setResult(null);
+
     let calculationResult: AdvancedCalculationResult;
 
     if (selectedRegime === 'RESICO') {
+      console.log('Datos RESICO (raw):', resicoData);
+      
       const data: ResicoAdvancedData = {
         totalIncome: parseCurrency(resicoData.totalIncome),
         withheldISR: parseCurrency(resicoData.withheldISR),
         provisionalPayments: parseCurrency(resicoData.provisionalPayments),
         withheldIVA: parseCurrency(resicoData.withheldIVA),
       };
+      
+      console.log('Datos RESICO (parseados):', data);
       calculationResult = calculateAdvancedResico(data, resicoPeriod);
+      console.log('Resultado RESICO:', calculationResult);
+      
     } else if (selectedRegime === 'EMPRESARIAL') {
+      console.log('Datos EMPRESARIAL (raw):', empresarialData);
+      
       const data: EmpresarialAdvancedData = {
         totalIncome: parseCurrency(empresarialData.totalIncome),
         totalDeductions: parseCurrency(empresarialData.totalDeductions),
         provisionalPayments: parseCurrency(empresarialData.provisionalPayments),
         withheldISR: parseCurrency(empresarialData.withheldISR),
       };
+      
+      console.log('Datos EMPRESARIAL (parseados):', data);
+      
       // Pasar el mes seleccionado al cálculo
       const monthForCalc = empresarialPeriod === 'anual' ? 12 : selectedMonth + 1;
+      console.log('Mes para cálculo:', monthForCalc);
+      
       calculationResult = calculateAdvancedEmpresarial(data, monthForCalc);
+      console.log('Resultado EMPRESARIAL:', calculationResult);
+      
     } else if (selectedRegime === 'MORAL') {
+      console.log('Datos MORAL (raw):', moralData);
+      
       const data: MoralAdvancedData = {
         totalIncome: parseCurrency(moralData.totalIncome),
         totalDeductions: parseCurrency(moralData.totalDeductions),
@@ -156,11 +206,19 @@ export const useAdvancedCalculator = (
         provisionalPayments: parseCurrency(moralData.provisionalPayments),
         withheldISR: parseCurrency(moralData.withheldISR),
       };
+      
+      console.log('Datos MORAL (parseados):', data);
       calculationResult = calculateAdvancedMoral(data);
+      console.log('Resultado MORAL:', calculationResult);
+      
     } else {
       // Para TABLES no hay cálculo
+      console.log('Régimen TABLES - sin cálculo');
       return;
     }
+
+    console.log('=== RESULTADO FINAL ===');
+    console.log(calculationResult);
 
     setResult(calculationResult);
     setShowResults(true);
@@ -191,7 +249,7 @@ export const useAdvancedCalculator = (
     });
     setShowResults(false);
     setResult(null);
-    setSelectedMonth(11); // Reset a diciembre
+    setSelectedMonth(11);
   };
 
   /**

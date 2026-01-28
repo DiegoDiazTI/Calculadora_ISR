@@ -1,11 +1,14 @@
 // app/(tabs)/index.tsx - CON PLACEHOLDERS INFORMATIVOS
-// Los inputs muestran ejemplos como placeholder, no como valores predeterminados
+// ✅ Swipe en TODA la pantalla: izquierda => Avanzada (con SwipeTabsWrapper + router.replace)
+// ✅ No depende de botón
+// ✅ Mantiene tu UI intacta
 
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Platform, View, StatusBar, Text } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { Header } from '@/components/layout/Header';
 import { RegimeSelector } from '@/components/calculator/RegimeSelector';
 import { Input } from '@/components/ui/Input';
@@ -15,20 +18,21 @@ import { CharacteristicsCard } from '@/components/calculator/CharacteristicsCard
 import { PeriodSelector } from '@/components/calculator/PeriodSelector';
 import { MonthSelector } from '@/components/calculator/MonthSelector';
 import { AllTaxTables } from '@/components/calculator/AllTaxTables';
-import { useTheme } from '@/hooks/useTheme';
+
 import { useCalculator } from '@/hooks/useCalculator';
 import { useAppContext } from '@/contexts/AppContext';
 import { REGIMES } from '@/constants/Regimes';
+import SwipeTabsWrapper from '@/components/navigation/SwipeTabsWrapper';
 
 const HEADER_BG = '#000000';
 
 export default function Index() {
   const navigation = useNavigation();
-  
+
   const { selectedRegime, setSelectedRegime, isDarkMode, theme, toggleTheme } = useAppContext();
-  
+
   const [localResicoPeriod, setLocalResicoPeriod] = useState<'mensual' | 'anual'>('anual');
-  
+
   const {
     annualIncome,
     deductions,
@@ -48,12 +52,12 @@ export default function Index() {
     reset,
     getTaxableBase,
   } = useCalculator(selectedRegime, localResicoPeriod);
-  
+
   useEffect(() => {
     if (resicoPeriod !== localResicoPeriod) {
       setLocalResicoPeriod(resicoPeriod);
     }
-  }, [resicoPeriod]);
+  }, [resicoPeriod, localResicoPeriod]);
 
   useEffect(() => {
     const baseTabBarStyle = {
@@ -82,284 +86,276 @@ export default function Index() {
   const isResico = selectedRegime === 'RESICO';
   const taxableBase = getTaxableBase();
 
-  const utilidadFiscal = isMoral && parseFloat(annualIncome.replace(/,/g, '')) > 0 && parseFloat(utilityCoefficient) > 0
-    ? parseFloat(annualIncome.replace(/,/g, '')) * parseFloat(utilityCoefficient)
-    : 0;
+  const utilidadFiscal =
+    isMoral && parseFloat(annualIncome.replace(/,/g, '')) > 0 && parseFloat(utilityCoefficient) > 0
+      ? parseFloat(annualIncome.replace(/,/g, '')) * parseFloat(utilityCoefficient)
+      : 0;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: HEADER_BG }]}>
-      <StatusBar barStyle={theme.statusBar as any} backgroundColor={HEADER_BG} />
-      <View style={[styles.page, { backgroundColor: theme.background }]}>
-        <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
-        
-        <KeyboardAwareScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          enableOnAndroid={true}
-          enableAutomaticScroll={true}
-          extraHeight={120}
-          extraScrollHeight={120}
-          keyboardOpeningTime={0}
-        >
-          <RegimeSelector
-            selectedRegime={selectedRegime}
-            onSelectRegime={setSelectedRegime}
-            theme={theme}
-          />
+    <SwipeTabsWrapper>
+      <SafeAreaView style={[styles.container, { backgroundColor: HEADER_BG }]}>
+        <StatusBar barStyle={theme.statusBar as any} backgroundColor={HEADER_BG} />
+        <View style={[styles.page, { backgroundColor: theme.background }]}>
+          <Header theme={theme} isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
 
-          {isTableView ? (
-            <AllTaxTables theme={theme} />
-          ) : (
-            <>
-              {currentRegime && (
-                <CharacteristicsCard
-                  title={`Características de ${currentRegime.title}`}
-                  characteristics={currentRegime.characteristics}
-                  theme={theme}
-                />
-              )}
+          <KeyboardAwareScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            extraHeight={120}
+            extraScrollHeight={120}
+            keyboardOpeningTime={0}
+          >
+            <RegimeSelector selectedRegime={selectedRegime} onSelectRegime={setSelectedRegime} theme={theme} />
 
-              {isResico && (
-                <PeriodSelector
-                  selectedPeriod={resicoPeriod}
-                  onSelectPeriod={handleResicoPeriodChange}
-                  theme={theme}
-                />
-              )}
-
-              {isEmpresarial && (
-                <>
-                  <PeriodSelector
-                    selectedPeriod={empresarialPeriod}
-                    onSelectPeriod={handleEmpresarialPeriodChange}
+            {isTableView ? (
+              <AllTaxTables theme={theme} />
+            ) : (
+              <>
+                {currentRegime && (
+                  <CharacteristicsCard
+                    title={`Características de ${currentRegime.title}`}
+                    characteristics={currentRegime.characteristics}
                     theme={theme}
                   />
-                  {empresarialPeriod === 'mensual' && (
-                    <MonthSelector
-                      selectedMonth={selectedMonth}
-                      onSelectMonth={handleEmpresarialMonthChange}
+                )}
+
+                {isResico && (
+                  <PeriodSelector
+                    selectedPeriod={resicoPeriod}
+                    onSelectPeriod={handleResicoPeriodChange}
+                    theme={theme}
+                  />
+                )}
+
+                {isEmpresarial && (
+                  <>
+                    <PeriodSelector
+                      selectedPeriod={empresarialPeriod}
+                      onSelectPeriod={handleEmpresarialPeriodChange}
                       theme={theme}
                     />
-                  )}
-                </>
-              )}
+                    {empresarialPeriod === 'mensual' && (
+                      <MonthSelector
+                        selectedMonth={selectedMonth}
+                        onSelectMonth={handleEmpresarialMonthChange}
+                        theme={theme}
+                      />
+                    )}
+                  </>
+                )}
 
-              {isMoral && (
-                <>
-                  <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
-                    <View style={styles.infoHeader}>
-                      <MaterialCommunityIcons name="percent" size={18} color={theme.accentLight} />
-                      <Text style={[styles.infoTitle, { color: theme.text }]}>
-                        Coeficiente de Utilidad
+                {isMoral && (
+                  <>
+                    <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
+                      <View style={styles.infoHeader}>
+                        <MaterialCommunityIcons name="percent" size={18} color={theme.accentLight} />
+                        <Text style={[styles.infoTitle, { color: theme.text }]}>Coeficiente de Utilidad</Text>
+                      </View>
+                      <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                        El coeficiente de utilidad se obtiene de la declaración anual del ejercicio anterior.
                       </Text>
                     </View>
-                    <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                      El coeficiente de utilidad se obtiene de la declaración anual del ejercicio anterior.
-                    </Text>
-                  </View>
 
-                  <Input
-                    label="Coeficiente de Utilidad (del año anterior)"
-                    prefix=""
-                    value={utilityCoefficient}
-                    onChangeText={handleCoefficientChange}
-                    keyboardType="decimal-pad"
-                    placeholder="0.2360"
-                    backgroundColor={theme.inputBg}
-                    borderColor={theme.inputBorder}
-                    textColor={theme.text}
-                    labelColor={theme.text}
-                    prefixColor={theme.textSecondary}
-                    selectionColor={theme.accentLight}
-                  />
+                    <Input
+                      label="Coeficiente de Utilidad (del año anterior)"
+                      prefix=""
+                      value={utilityCoefficient}
+                      onChangeText={handleCoefficientChange}
+                      keyboardType="decimal-pad"
+                      placeholder="ej. 0.20 para 20%"
+                      backgroundColor={theme.inputBg}
+                      borderColor={theme.inputBorder}
+                      textColor={theme.text}
+                      labelColor={theme.text}
+                      prefixColor={theme.textSecondary}
+                      selectionColor={theme.accentLight}
+                    />
 
-                  {parseFloat(utilityCoefficient) > 0 && (
-                    <View style={[styles.coefficientPreview, { backgroundColor: theme.cardBackground, borderColor: theme.accentLight }]}>
-                      <Text style={[styles.coefficientPreviewLabel, { color: theme.textSecondary }]}>
-                        Coeficiente:
+                    {parseFloat(utilityCoefficient) > 0 && (
+                      <View
+                        style={[
+                          styles.coefficientPreview,
+                          { backgroundColor: theme.cardBackground, borderColor: theme.accentLight },
+                        ]}
+                      >
+                        <Text style={[styles.coefficientPreviewLabel, { color: theme.textSecondary }]}>Coeficiente:</Text>
+                        <Text style={[styles.coefficientPreviewValue, { color: theme.accentLight }]}>
+                          {(parseFloat(utilityCoefficient) * 100).toFixed(2)}%
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+
+                <Input
+                  label={
+                    isEmpresarial
+                      ? 'Ingresos Acumulables'
+                      : isMoral
+                      ? 'Ingresos Nominales Anuales'
+                      : isResico
+                      ? resicoPeriod === 'mensual'
+                        ? 'Ingresos Mensuales'
+                        : 'Ingresos Anuales'
+                      : 'Utilidad Fiscal'
+                  }
+                  prefix="$"
+                  value={annualIncome}
+                  onChangeText={handleIncomeChange}
+                  keyboardType="numeric"
+                  placeholder={
+                    isEmpresarial
+                      ? 'Ingresos Acumulables'
+                      : isMoral
+                      ? 'Ingresos Nominales'
+                      : isResico
+                      ? resicoPeriod === 'mensual'
+                        ? 'Ingresos Mensuales'
+                        : 'Ingresos Anuales'
+                      : 'Utilidad Fiscal'
+                  }
+                  backgroundColor={theme.inputBg}
+                  borderColor={theme.inputBorder}
+                  textColor={theme.text}
+                  labelColor={theme.text}
+                  prefixColor={theme.textSecondary}
+                  selectionColor={theme.accentLight}
+                />
+
+                {isMoral && utilidadFiscal > 0 && (
+                  <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.accentLight }]}>
+                    <View style={styles.previewHeader}>
+                      <MaterialCommunityIcons name="calculator" size={18} color={theme.accentLight} />
+                      <Text style={[styles.previewTitle, { color: theme.text }]}>Cálculo de Utilidad Fiscal</Text>
+                    </View>
+
+                    <View style={styles.previewRow}>
+                      <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>Ingresos nominales:</Text>
+                      <Text style={[styles.previewValue, { color: theme.text }]}>
+                        ${parseFloat(annualIncome.replace(/,/g, '')).toLocaleString('en-US')}
                       </Text>
-                      <Text style={[styles.coefficientPreviewValue, { color: theme.accentLight }]}>
+                    </View>
+
+                    <View style={styles.previewRow}>
+                      <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>× Coeficiente:</Text>
+                      <Text style={[styles.previewValue, { color: theme.text }]}>
                         {(parseFloat(utilityCoefficient) * 100).toFixed(2)}%
                       </Text>
                     </View>
-                  )}
-                </>
-              )}
 
-              <Input
-                label={
-                  isEmpresarial 
-                    ? "Ingresos Acumulables" 
-                    : isMoral
-                    ? "Ingresos Nominales Anuales"
-                    : isResico
-                    ? (resicoPeriod === 'mensual' ? "Ingresos Mensuales" : "Ingresos Anuales")
-                    : "Utilidad Fiscal"
-                }
-                prefix="$"
-                value={annualIncome}
-                onChangeText={handleIncomeChange}
-                keyboardType="numeric"
-                placeholder={
-                  isEmpresarial 
-                    ? "3,000,000" 
-                    : isMoral
-                    ? "5,000,000"
-                    : isResico
-                    ? (resicoPeriod === 'mensual' ? "104,166" : "1,250,000")
-                    : "1,250,000"
-                }
-                backgroundColor={theme.inputBg}
-                borderColor={theme.inputBorder}
-                textColor={theme.text}
-                labelColor={theme.text}
-                prefixColor={theme.textSecondary}
-                selectionColor={theme.accentLight}
-              />
+                    <View style={[styles.previewDivider, { borderTopColor: theme.border }]} />
 
-              {isMoral && utilidadFiscal > 0 && (
-                <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.accentLight }]}>
-                  <View style={styles.previewHeader}>
-                    <MaterialCommunityIcons name="calculator" size={18} color={theme.accentLight} />
-                    <Text style={[styles.previewTitle, { color: theme.text }]}>
-                      Cálculo de Utilidad Fiscal
-                    </Text>
-                  </View>
-                  
-                  <View style={styles.previewRow}>
-                    <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>Ingresos nominales:</Text>
-                    <Text style={[styles.previewValue, { color: theme.text }]}>
-                      ${parseFloat(annualIncome.replace(/,/g, '')).toLocaleString('en-US')}
-                    </Text>
-                  </View>
-                  
-                  <View style={styles.previewRow}>
-                    <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>× Coeficiente:</Text>
-                    <Text style={[styles.previewValue, { color: theme.text }]}>
-                      {(parseFloat(utilityCoefficient) * 100).toFixed(2)}%
-                    </Text>
-                  </View>
-                  
-                  <View style={[styles.previewDivider, { borderTopColor: theme.border }]} />
-                  
-                  <View style={styles.previewRow}>
-                    <Text style={[styles.previewLabel, { color: theme.text, fontWeight: 'bold' }]}>
-                      = Utilidad fiscal:
-                    </Text>
-                    <Text style={[styles.previewValue, { color: theme.accentLight, fontWeight: 'bold' }]}>
-                      ${utilidadFiscal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </Text>
-                  </View>
-                  
-                  <Text style={[styles.previewNote, { color: theme.textTertiary }]}>
-                    El ISR (30%) se calculará sobre esta utilidad fiscal
-                  </Text>
-                </View>
-              )}
-
-              {isEmpresarial && (
-                <>
-                  <Input
-                    label="Deducciones Autorizadas Totales"
-                    prefix="$"
-                    value={deductions}
-                    onChangeText={handleDeductionsChange}
-                    keyboardType="numeric"
-                    placeholder="2,160,000"
-                    backgroundColor={theme.inputBg}
-                    borderColor={theme.inputBorder}
-                    textColor={theme.text}
-                    labelColor={theme.text}
-                    prefixColor={theme.textSecondary}
-                    selectionColor={theme.accentLight}
-                  />
-
-                  <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
-                    <View style={styles.infoHeader}>
-                      <MaterialCommunityIcons name="information" size={20} color={theme.accentLight} />
-                      <Text style={[styles.infoTitle, { color: theme.text }]}>
-                        ¿Qué incluir en deducciones?
+                    <View style={styles.previewRow}>
+                      <Text style={[styles.previewLabel, { color: theme.text, fontWeight: 'bold' }]}>= Utilidad fiscal:</Text>
+                      <Text style={[styles.previewValue, { color: theme.accentLight, fontWeight: 'bold' }]}>
+                        ${utilidadFiscal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                       </Text>
                     </View>
-                    <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-                      Suma todas tus deducciones autorizadas acumuladas al mes seleccionado:
 
-                      - Compras y costos de ventas{'\n'}
-                      - Gastos de operacion{'\n'}
-                      - Sueldos y salarios{'\n'}
-                      - Rentas del local{'\n'}
-                      - Depreciaciones{'\n'}
-                      - Intereses pagados{'\n'}
-                      - Otros gastos deducibles
+                    <Text style={[styles.previewNote, { color: theme.textTertiary }]}>
+                      El ISR (30%) se calculará sobre esta utilidad fiscal
                     </Text>
                   </View>
+                )}
 
-                  {parseFloat(annualIncome.replace(/,/g, '')) > 0 && (
-                    <View style={[styles.previewCard, { backgroundColor: theme.cardBackground, borderColor: theme.accentLight }]}>
-                      <View style={styles.previewHeader}>
-                        <MaterialCommunityIcons name="calculator" size={18} color={theme.accentLight} />
-                        <Text style={[styles.previewTitle, { color: theme.text }]}>
-                          Cálculo de Base Gravable
-                        </Text>
+                {isEmpresarial && (
+                  <>
+                    <Input
+                      label="Deducciones Autorizadas Totales"
+                      prefix="$"
+                      value={deductions}
+                      onChangeText={handleDeductionsChange}
+                      keyboardType="numeric"
+                      placeholder="Ingrese deducciones"
+                      backgroundColor={theme.inputBg}
+                      borderColor={theme.inputBorder}
+                      textColor={theme.text}
+                      labelColor={theme.text}
+                      prefixColor={theme.textSecondary}
+                      selectionColor={theme.accentLight}
+                    />
+
+                    <View style={[styles.infoCard, { backgroundColor: theme.detailCard }]}>
+                      <View style={styles.infoHeader}>
+                        <MaterialCommunityIcons name="information" size={20} color={theme.accentLight} />
+                        <Text style={[styles.infoTitle, { color: theme.text }]}>¿Qué incluir en deducciones?</Text>
                       </View>
-                      
-                      <View style={styles.previewRow}>
-                        <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>Ingresos:</Text>
-                        <Text style={[styles.previewValue, { color: theme.text }]}>
-                          ${parseFloat(annualIncome.replace(/,/g, '')).toLocaleString('en-US')}
-                        </Text>
-                      </View>
-                      
-                      <View style={styles.previewRow}>
-                        <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>- Deducciones:</Text>
-                        <Text style={[styles.previewValue, { color: '#EF4444' }]}>
-                          ${parseFloat(deductions.replace(/,/g, '') || '0').toLocaleString('en-US')}
-                        </Text>
-                      </View>
-                      
-                      <View style={[styles.previewDivider, { borderTopColor: theme.border }]} />
-                      
-                      <View style={styles.previewRow}>
-                        <Text style={[styles.previewLabel, { color: theme.text, fontWeight: 'bold' }]}>
-                          = Base gravable:
-                        </Text>
-                        <Text style={[styles.previewValue, { color: theme.accentLight, fontWeight: 'bold' }]}>
-                          ${taxableBase.toLocaleString('en-US')}
-                        </Text>
-                      </View>
-                      
-                      <Text style={[styles.previewNote, { color: theme.textTertiary }]}>
-                        El ISR se calculará sobre esta cantidad
+                      <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+                        Suma todas tus deducciones autorizadas acumuladas al mes seleccionado:
+                        {'\n\n'}
+                        - Compras y costos de ventas{'\n'}
+                        - Gastos de operacion{'\n'}
+                        - Sueldos y salarios{'\n'}
+                        - Rentas del local{'\n'}
+                        - Depreciaciones{'\n'}
+                        - Intereses pagados{'\n'}
+                        - Otros gastos deducibles
                       </Text>
                     </View>
-                  )}
-                </>
-              )}
 
-              <Button
-                title="Calcular ISR"
-                icon="calculator"
-                onPress={calculateISR}
-                backgroundColor={theme.accent}
-              />
+                    {parseFloat(annualIncome.replace(/,/g, '')) > 0 && (
+                      <View
+                        style={[
+                          styles.previewCard,
+                          { backgroundColor: theme.cardBackground, borderColor: theme.accentLight },
+                        ]}
+                      >
+                        <View style={styles.previewHeader}>
+                          <MaterialCommunityIcons name="calculator" size={18} color={theme.accentLight} />
+                          <Text style={[styles.previewTitle, { color: theme.text }]}>Cálculo de Base Gravable</Text>
+                        </View>
 
-              {showResults && result && (
-                <>
+                        <View style={styles.previewRow}>
+                          <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>Ingresos:</Text>
+                          <Text style={[styles.previewValue, { color: theme.text }]}>
+                            ${parseFloat(annualIncome.replace(/,/g, '')).toLocaleString('en-US')}
+                          </Text>
+                        </View>
+
+                        <View style={styles.previewRow}>
+                          <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>- Deducciones:</Text>
+                          <Text style={[styles.previewValue, { color: '#EF4444' }]}>
+                            ${parseFloat(deductions.replace(/,/g, '') || '0').toLocaleString('en-US')}
+                          </Text>
+                        </View>
+
+                        <View style={[styles.previewDivider, { borderTopColor: theme.border }]} />
+
+                        <View style={styles.previewRow}>
+                          <Text style={[styles.previewLabel, { color: theme.text, fontWeight: 'bold' }]}>= Base gravable:</Text>
+                          <Text style={[styles.previewValue, { color: theme.accentLight, fontWeight: 'bold' }]}>
+                            ${taxableBase.toLocaleString('en-US')}
+                          </Text>
+                        </View>
+
+                        <Text style={[styles.previewNote, { color: theme.textTertiary }]}>
+                          El ISR se calculará sobre esta cantidad
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+
+                <Button title="Calcular ISR" icon="calculator" onPress={calculateISR} backgroundColor={theme.accent} />
+
+                {showResults && result && (
                   <ResultsCard
                     result={result}
                     income={parseFloat(annualIncome.replace(/,/g, '')) || 0}
                     regime={selectedRegime}
                     theme={theme}
                   />
-                </>
-              )}
-            </>
-          )}
-        </KeyboardAwareScrollView>
-      </View>
-    </SafeAreaView>
+                )}
+              </>
+            )}
+          </KeyboardAwareScrollView>
+        </View>
+      </SafeAreaView>
+    </SwipeTabsWrapper>
   );
 }
 

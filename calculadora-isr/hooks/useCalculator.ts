@@ -2,11 +2,12 @@
 // Los inputs inician vacíos, solo muestran ejemplos como placeholders
 
 import { useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import { RegimeType, CalculationResult } from '@/types';
-import { 
-  calculateResicoISR, 
+import {
+  calculateResicoISR,
   calculateMoralISR,
-  calculateActividadEmpresarialISR 
+  calculateActividadEmpresarialISR
 } from '@/utils/calculations';
 import { formatCurrencyInput, parseCurrency } from '@/utils/formatters';
 
@@ -15,10 +16,11 @@ export const useCalculator = (
   initialPeriod: 'mensual' | 'anual' = 'anual'
 ) => {
   const [selectedRegime] = useState<RegimeType>(initialRegime);
-const [annualIncome, setAnnualIncome] = useState('');
-const [deductions, setDeductions] = useState('');
-const [utilityCoefficient, setUtilityCoefficient] = useState('');
-  
+
+  const [annualIncome, setAnnualIncome] = useState('');
+  const [deductions, setDeductions] = useState('');
+  const [utilityCoefficient, setUtilityCoefficient] = useState('');
+
   // Estado para RESICO - Periodo de cálculo (mensual/anual)
   const [resicoPeriod, setResicoPeriod] = useState<'mensual' | 'anual'>(initialPeriod);
   // Estado para Actividad Empresarial - Mes seleccionado (0-11)
@@ -26,23 +28,28 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
   // Estado para Actividad Empresarial - Periodo de cálculo (mensual/anual)
   const [empresarialPeriod, setEmpresarialPeriod] = useState<'mensual' | 'anual'>('mensual');
 
-  
   const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
 
   /**
-   * ⚠️ CRÍTICO: Limpia resultados cuando cambia el régimen desde el contexto
+   * ✅ CRÍTICO: Reinicia inputs + resultados cuando cambia el régimen
    */
   useEffect(() => {
+    // Limpiar resultados
     setShowResults(false);
     setResult(null);
-    
-    // Resetear deducciones si no es empresarial
-    if (initialRegime !== 'EMPRESARIAL') {
-      setDeductions('');
-    }
-    
-  }, [initialRegime]);
+
+    // Reiniciar inputs SIEMPRE al cambiar de régimen
+    setAnnualIncome('');
+    setDeductions('');
+    setUtilityCoefficient('');
+
+    // Reiniciar controles/selecciones por régimen
+    setResicoPeriod(initialPeriod);     // vuelve al periodo default del hook
+    setSelectedMonth(11);               // diciembre
+    setEmpresarialPeriod('mensual');    // default empresarial
+
+  }, [initialRegime, initialPeriod]);
 
   /**
    * Maneja el cambio de ingreso con formato
@@ -68,12 +75,12 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
   const handleCoefficientChange = (text: string) => {
     // Permitir números y punto decimal
     const cleaned = text.replace(/[^0-9.]/g, '');
-    
+
     // Validar formato de decimal (máximo 4 decimales)
     const parts = cleaned.split('.');
     if (parts.length > 2) return;
     if (parts[1] && parts[1].length > 4) return;
-    
+
     setUtilityCoefficient(cleaned);
     setShowResults(false);
   };
@@ -112,16 +119,16 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
     if (initialRegime !== 'EMPRESARIAL') {
       return parseCurrency(annualIncome);
     }
-    
+
     const income = parseCurrency(annualIncome);
     const deduct = parseCurrency(deductions);
     const taxableBase = income - deduct;
-    
+
     return taxableBase > 0 ? taxableBase : 0;
   };
 
   /**
-   * ⚠️ CRÍTICO: Calcula el ISR según el régimen ACTUAL (initialRegime)
+   * Calcula el ISR según el régimen ACTUAL (initialRegime)
    */
   const calculateISR = () => {
     console.log('==========================================');
@@ -133,10 +140,10 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
     console.log('📉 Deducciones RAW:', deductions);
     console.log('🔢 Coeficiente:', utilityCoefficient);
     console.log('📅 Periodo RESICO:', resicoPeriod);
-    
+
     const income = parseCurrency(annualIncome);
     const deduct = parseCurrency(deductions);
-    
+
     console.log('✅ Ingreso PARSEADO:', income);
     console.log('✅ Deducciones PARSEADAS:', deduct);
 
@@ -151,14 +158,14 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
       const coefficient = parseFloat(utilityCoefficient || '0');
       const utilidadFiscal = income * coefficient;
       console.log('   Utilidad fiscal:', utilidadFiscal);
-      
+
       calculationResult = calculateMoralISR(utilidadFiscal);
       console.log('🟣 Resultado MORAL:', calculationResult);
     } else if (initialRegime === 'EMPRESARIAL') {
       console.log('🟡 Calculando EMPRESARIAL...');
       const taxableBase = income - deduct;
       console.log('   Base gravable:', taxableBase);
-      
+
       if (taxableBase <= 0) {
         console.log('⚠️ Base gravable negativa o cero');
         calculationResult = {
@@ -187,7 +194,7 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
     console.log('    Tasa:', calculationResult.rate);
     console.log('    Tramo:', calculationResult.bracket);
     console.log('    Neto:', calculationResult.netIncome);
-    
+
     console.log('🔄 Actualizando estado: showResults = TRUE');
     setResult(calculationResult);
     setShowResults(true);
@@ -203,6 +210,8 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
     setDeductions('');
     setUtilityCoefficient('');
     setSelectedMonth(11);
+    setResicoPeriod(initialPeriod);
+    setEmpresarialPeriod('mensual');
     setShowResults(false);
     setResult(null);
   };
@@ -228,6 +237,3 @@ const [utilityCoefficient, setUtilityCoefficient] = useState('');
     getTaxableBase,
   };
 };
-
-// Import Platform para logs
-import { Platform } from 'react-native';

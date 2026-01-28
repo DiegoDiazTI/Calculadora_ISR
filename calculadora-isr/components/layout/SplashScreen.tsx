@@ -94,8 +94,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const appVersion =
-    Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0';
+  const appVersion = Constants.expoConfig?.version ?? '1.0';
 
   // Animación de float para el logo
   useEffect(() => {
