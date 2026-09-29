@@ -186,11 +186,57 @@ export const abbreviateNumber = (value: number): string => {
 export const safeNumberFormat = (value: any): string => {
   try {
     const validValue = validateValue(value);
-    
+
     // Formato manual sin locale
     return validValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   } catch (error) {
     console.error('Error in safe number format:', error);
     return '0.00';
+  }
+};
+
+/**
+ * Formatea el límite INFERIOR de un tramo fiscal para mostrarlo en una tabla
+ * de consulta: redondea hacia ARRIBA al peso entero (ej. 300000.01 -> "$300,001").
+ *
+ * El valor real usado para calcular el ISR sigue siendo el centavo exacto
+ * (ej. 300000.01) — esto es solo para que la tabla se vea legible sin que el
+ * límite inferior de un tramo se vea igual al límite superior del anterior.
+ * @param min - Límite inferior real del tramo (normalmente termina en .01)
+ */
+export const formatBracketLowerBound = (min: number): string => {
+  try {
+    const validMin = validateValue(min);
+    return `$${Math.ceil(validMin).toLocaleString('en-US')}`;
+  } catch (error) {
+    console.error('Error formatting bracket lower bound:', error);
+    return '$0';
+  }
+};
+
+/**
+ * Formatea el límite SUPERIOR de un tramo fiscal, redondeando hacia ABAJO al
+ * peso entero. Si `max` coincide con `openEndedValue` (el centinela que usan
+ * las tablas para "sin límite", ej. 999999999.99 en Actividad Empresarial),
+ * regresa `openEndedLabel` en vez de un número.
+ *
+ * OJO: RESICO no usa ese centinela — su último tramo tiene un tope real
+ * ($3,500,000), así que ahí sí debe mostrarse el número, no "En adelante".
+ * @param max - Límite superior real del tramo
+ */
+export const formatBracketUpperBound = (
+  max: number,
+  openEndedValue: number = 999999999.99,
+  openEndedLabel: string = 'En adelante'
+): string => {
+  try {
+    if (max === openEndedValue) {
+      return openEndedLabel;
+    }
+    const validMax = validateValue(max);
+    return `$${Math.floor(validMax).toLocaleString('en-US')}`;
+  } catch (error) {
+    console.error('Error formatting bracket upper bound:', error);
+    return '$0';
   }
 };

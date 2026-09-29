@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemeColors } from '@/types';
 import { RESICO_TAX_TABLE_MENSUAL, RESICO_TAX_TABLE_ANUAL, ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL, PERSONA_MORAL_RATE, CURRENT_TAX_YEAR } from '@/constants/taxTables';
+import { formatBracketLowerBound, formatBracketUpperBound } from '@/utils/formatters';
 
 interface AllTaxTablesProps {
   theme: ThemeColors;
@@ -192,15 +193,12 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
             <View key={index} style={[styles.resicoDataRow, { borderBottomColor: theme.border }]}>
               <View style={styles.resicoCol1}>
                 <Text style={[styles.resicoDataText, { color: theme.textSecondary }]} numberOfLines={1}>
-                  ${bracket.min.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  {formatBracketLowerBound(bracket.min)}
                 </Text>
               </View>
               <View style={styles.resicoCol2}>
                 <Text style={[styles.resicoDataText, { color: theme.textSecondary }]} numberOfLines={1}>
-                  {bracket.max === 999999999.99 || bracket.max >= 3500000
-                    ? 'En adelante' 
-                    : `$${bracket.max.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
-                  }
+                  {formatBracketUpperBound(bracket.max)}
                 </Text>
               </View>
               <View style={styles.resicoCol3}>
@@ -302,12 +300,12 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
               <View key={index} style={[styles.tableDataRow, { borderBottomColor: theme.border }]}>
                 <View style={styles.tableCol1}>
                   <Text style={[styles.dataTextSmall, { color: theme.textSecondary }]} numberOfLines={1}>
-                    ${bracket.min.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    {formatBracketLowerBound(bracket.min)}
                   </Text>
                 </View>
                 <View style={styles.tableCol2}>
                   <Text style={[styles.dataTextSmall, { color: theme.textSecondary }]} numberOfLines={1}>
-                    {bracket.max === 999999999.99 ? 'Adelante' : `$${bracket.max.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+                    {formatBracketUpperBound(bracket.max, 999999999.99, 'Adelante')}
                   </Text>
                 </View>
                 <View style={styles.tableCol3}>

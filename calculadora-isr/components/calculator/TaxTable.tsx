@@ -5,6 +5,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemeColors } from '@/types';
 import { RESICO_TAX_TABLE_MENSUAL } from '@/constants/taxTables';
+import { formatBracketLowerBound, formatBracketUpperBound } from '@/utils/formatters';
 
 interface TaxTableProps {
   theme: ThemeColors;
@@ -30,8 +31,8 @@ const TaxTable: React.FC<TaxTableProps> = ({ theme }) => {
       {RESICO_TAX_TABLE_MENSUAL.map((bracket, index) => (
         <View key={index} style={styles.dataRow}>
           <Text style={[styles.dataText, { color: theme.textSecondary }]}>
-            {bracket.min === 0 ? 'Hasta ' : `$${bracket.min.toLocaleString()} - `}
-            ${bracket.max.toLocaleString()}
+            {bracket.min === 0 ? 'Hasta ' : `${formatBracketLowerBound(bracket.min)} - `}
+            {formatBracketUpperBound(bracket.max)}
           </Text>
           <Text style={[styles.dataRate, { color: theme.accentLight }]}>
             {(bracket.rate * 100).toFixed(2)}%

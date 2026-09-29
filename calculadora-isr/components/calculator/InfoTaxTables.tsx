@@ -12,6 +12,7 @@ import {
   PERSONA_MORAL_RATE,
   CURRENT_TAX_YEAR
 } from '@/constants/taxTables';
+import { formatBracketLowerBound, formatBracketUpperBound } from '@/utils/formatters';
 
 interface InfoTaxTablesProps {
   regime: RegimeType;
@@ -64,12 +65,12 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
             <View key={index} style={[styles.tableRow, { borderBottomColor: theme.border }]}>
               <View style={styles.colData}>
                 <Text style={[styles.dataText, { color: theme.text }]}>
-                  ${bracket.min.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatBracketLowerBound(bracket.min)}
                 </Text>
               </View>
               <View style={styles.colData}>
                 <Text style={[styles.dataText, { color: theme.text }]}>
-                  ${bracket.max === 3500000 ? '3,500,000.00' : bracket.max.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatBracketUpperBound(bracket.max)}
                 </Text>
               </View>
               <View style={styles.colDataSmall}>
@@ -126,15 +127,12 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
                   <View key={index} style={[styles.tableRow, { borderBottomColor: theme.border }]}>
                     <View style={styles.colDataEmp}>
                       <Text style={[styles.dataTextSmall, { color: theme.text }]} numberOfLines={1}>
-                        ${annualBracket.min.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                        {formatBracketLowerBound(annualBracket.min)}
                       </Text>
                     </View>
                     <View style={styles.colDataEmp}>
                       <Text style={[styles.dataTextSmall, { color: theme.text }]} numberOfLines={1}>
-                        {annualBracket.max === 999999999.99 
-                          ? 'En adelante' 
-                          : `$${annualBracket.max.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
-                        }
+                        {formatBracketUpperBound(annualBracket.max)}
                       </Text>
                     </View>
                     <View style={styles.colDataEmp}>
