@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemeColors } from '@/types';
-import { RESICO_TAX_TABLE_2025, RESICO_TAX_TABLE_ANUAL_2025, ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025, PERSONA_MORAL_RATE } from '@/constants/TaxTables';
+import { RESICO_TAX_TABLE_MENSUAL, RESICO_TAX_TABLE_ANUAL, ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL, PERSONA_MORAL_RATE, CURRENT_TAX_YEAR } from '@/constants/taxTables';
 
 interface AllTaxTablesProps {
   theme: ThemeColors;
@@ -37,7 +37,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
   };
 
   const getTablaParaMes = (mesNumero: number) => {
-    return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map(bracket => ({
+    return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL.map(bracket => ({
       ...bracket,
       min: bracket.min * mesNumero,
       max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * mesNumero,
@@ -46,8 +46,8 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
   };
 
   const resicoTableData = resicoPeriod === 'MENSUAL'
-    ? RESICO_TAX_TABLE_2025
-    : RESICO_TAX_TABLE_ANUAL_2025;
+    ? RESICO_TAX_TABLE_MENSUAL
+    : RESICO_TAX_TABLE_ANUAL;
 
   return (
     <View style={styles.container}>
@@ -114,7 +114,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
           <View style={styles.tableHeader}>
             <MaterialCommunityIcons name="account" size={24} color={theme.accentLight} />
             <Text style={[styles.tableTitle, { color: theme.text }]}>
-              Tabla RESICO 2025
+              Tabla RESICO {CURRENT_TAX_YEAR}
             </Text>
           </View>
 
@@ -220,7 +220,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
             <View style={styles.tableHeader}>
               <MaterialCommunityIcons name="briefcase" size={24} color={theme.accentLight} />
               <Text style={[styles.tableTitle, { color: theme.text }]}>
-                Actividad Empresarial 2025
+                Actividad Empresarial {CURRENT_TAX_YEAR}
               </Text>
             </View>
 
@@ -332,7 +332,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
           <View style={styles.tableHeader}>
             <MaterialCommunityIcons name="office-building" size={24} color={theme.accentLight} />
             <Text style={[styles.tableTitle, { color: theme.text }]}>
-              Tabla Persona Moral 2025
+              Tabla Persona Moral {CURRENT_TAX_YEAR}
             </Text>
           </View>
 
@@ -398,7 +398,7 @@ export const AllTaxTables: React.FC<AllTaxTablesProps> = ({ theme }) => {
         <MaterialCommunityIcons name="information-outline" size={16} color={theme.textSecondary} />
         <View style={styles.footerTextContainer}>
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-            Tablas vigentes para el ejercicio fiscal 2025. Consulta con tu contador para casos específicos.
+            Tablas vigentes para el ejercicio fiscal {CURRENT_TAX_YEAR}. Consulta con tu contador para casos específicos.
           </Text>
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
             Estas tablas son meramente informativas y no sustituyen asesoramiento profesional.

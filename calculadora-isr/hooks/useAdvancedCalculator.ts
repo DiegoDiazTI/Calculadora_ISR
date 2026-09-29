@@ -79,8 +79,6 @@ export const useAdvancedCalculator = (
       provisionalPayments: '',
       withheldISR: '',
     });
-    
-    console.log('🔄 Régimen cambiado a:', initialRegime, '- Todos los inputs reseteados');
   }, [initialRegime]);
 
   /**
@@ -153,10 +151,6 @@ export const useAdvancedCalculator = (
    * Calcula el ISR según el régimen seleccionado
    */
   const calculateISR = () => {
-    console.log('=== CALCULANDO ISR ===');
-    console.log('Régimen seleccionado:', selectedRegime);
-    console.log('Mes seleccionado:', selectedMonth);
-
     // Limpiar resultado anterior antes de calcular
     setShowResults(false);
     setResult(null);
@@ -164,41 +158,29 @@ export const useAdvancedCalculator = (
     let calculationResult: AdvancedCalculationResult;
 
     if (selectedRegime === 'RESICO') {
-      console.log('Datos RESICO (raw):', resicoData);
-      
       const data: ResicoAdvancedData = {
         totalIncome: parseCurrency(resicoData.totalIncome),
         withheldISR: parseCurrency(resicoData.withheldISR),
         provisionalPayments: parseCurrency(resicoData.provisionalPayments),
         withheldIVA: parseCurrency(resicoData.withheldIVA),
       };
-      
-      console.log('Datos RESICO (parseados):', data);
+
       calculationResult = calculateAdvancedResico(data, resicoPeriod);
-      console.log('Resultado RESICO:', calculationResult);
-      
+
     } else if (selectedRegime === 'EMPRESARIAL') {
-      console.log('Datos EMPRESARIAL (raw):', empresarialData);
-      
       const data: EmpresarialAdvancedData = {
         totalIncome: parseCurrency(empresarialData.totalIncome),
         totalDeductions: parseCurrency(empresarialData.totalDeductions),
         provisionalPayments: parseCurrency(empresarialData.provisionalPayments),
         withheldISR: parseCurrency(empresarialData.withheldISR),
       };
-      
-      console.log('Datos EMPRESARIAL (parseados):', data);
-      
+
       // Pasar el mes seleccionado al cálculo
       const monthForCalc = empresarialPeriod === 'anual' ? 12 : selectedMonth + 1;
-      console.log('Mes para cálculo:', monthForCalc);
-      
+
       calculationResult = calculateAdvancedEmpresarial(data, monthForCalc);
-      console.log('Resultado EMPRESARIAL:', calculationResult);
-      
+
     } else if (selectedRegime === 'MORAL') {
-      console.log('Datos MORAL (raw):', moralData);
-      
       const data: MoralAdvancedData = {
         totalIncome: parseCurrency(moralData.totalIncome),
         totalDeductions: parseCurrency(moralData.totalDeductions),
@@ -206,19 +188,13 @@ export const useAdvancedCalculator = (
         provisionalPayments: parseCurrency(moralData.provisionalPayments),
         withheldISR: parseCurrency(moralData.withheldISR),
       };
-      
-      console.log('Datos MORAL (parseados):', data);
+
       calculationResult = calculateAdvancedMoral(data);
-      console.log('Resultado MORAL:', calculationResult);
-      
+
     } else {
       // Para TABLES no hay cálculo
-      console.log('Régimen TABLES - sin cálculo');
       return;
     }
-
-    console.log('=== RESULTADO FINAL ===');
-    console.log(calculationResult);
 
     setResult(calculationResult);
     setShowResults(true);

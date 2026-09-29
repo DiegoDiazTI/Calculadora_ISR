@@ -5,12 +5,13 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemeColors, RegimeType } from '@/types';
-import { 
-  RESICO_TAX_TABLE_2025, // MENSUAL
-  RESICO_TAX_TABLE_ANUAL_2025, // ANUAL
-  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
-  PERSONA_MORAL_RATE 
-} from '@/constants/TaxTables';
+import {
+  RESICO_TAX_TABLE_MENSUAL,
+  RESICO_TAX_TABLE_ANUAL,
+  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL,
+  PERSONA_MORAL_RATE,
+  CURRENT_TAX_YEAR
+} from '@/constants/taxTables';
 
 interface InfoTaxTablesProps {
   regime: RegimeType;
@@ -38,7 +39,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
       {regime === 'RESICO' && (
         <>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Tabla {period === 'mensual' ? 'Mensual' : 'Anual'} RESICO 2025
+            Tabla {period === 'mensual' ? 'Mensual' : 'Anual'} RESICO {CURRENT_TAX_YEAR}
           </Text>
           
           <View style={styles.tableHeader}>
@@ -59,7 +60,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
             </View>
           </View>
 
-          {(period === 'mensual' ? RESICO_TAX_TABLE_2025 : RESICO_TAX_TABLE_ANUAL_2025).map((bracket, index) => (
+          {(period === 'mensual' ? RESICO_TAX_TABLE_MENSUAL : RESICO_TAX_TABLE_ANUAL).map((bracket, index) => (
             <View key={index} style={[styles.tableRow, { borderBottomColor: theme.border }]}>
               <View style={styles.colData}>
                 <Text style={[styles.dataText, { color: theme.text }]}>
@@ -85,7 +86,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
       {regime === 'EMPRESARIAL' && (
         <>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Tabla Anual - Actividad Empresarial 2025
+            Tabla Anual - Actividad Empresarial {CURRENT_TAX_YEAR}
           </Text>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -113,7 +114,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
                 </View>
               </View>
 
-              {ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.slice(0, 5).map((bracket, index) => {
+              {ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL.slice(0, 5).map((bracket, index) => {
                 const annualBracket = {
                   min: bracket.min * 12,
                   max: bracket.max === 999999999.99 ? bracket.max : bracket.max * 12,
@@ -153,7 +154,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
           </ScrollView>
           
           <Text style={[styles.note, { color: theme.textTertiary }]}>
-            Mostrando primeros 5 tramos. Ver tabla completa en "Tablas ISR"
+            Mostrando primeros 5 tramos. Ver tabla completa en &quot;Tablas ISR&quot;
           </Text>
         </>
       )}
@@ -162,7 +163,7 @@ export const InfoTaxTables: React.FC<InfoTaxTablesProps> = ({
       {regime === 'MORAL' && (
         <>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Tasa General - Persona Moral 2025
+            Tasa General - Persona Moral {CURRENT_TAX_YEAR}
           </Text>
           
           <View style={[styles.moralCard, { backgroundColor: theme.accent }]}>

@@ -4,7 +4,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemeColors } from '@/types';
-import { RESICO_TAX_TABLE_2025 } from '@/constants/TaxTables';
+import { RESICO_TAX_TABLE_MENSUAL } from '@/constants/taxTables';
 
 interface TaxTableProps {
   theme: ThemeColors;
@@ -27,7 +27,7 @@ const TaxTable: React.FC<TaxTableProps> = ({ theme }) => {
         <Text style={[styles.headerText, { color: theme.textTertiary }]}>TASA ISR</Text>
       </View>
 
-      {RESICO_TAX_TABLE_2025.map((bracket, index) => (
+      {RESICO_TAX_TABLE_MENSUAL.map((bracket, index) => (
         <View key={index} style={styles.dataRow}>
           <Text style={[styles.dataText, { color: theme.textSecondary }]}>
             {bracket.min === 0 ? 'Hasta ' : `$${bracket.min.toLocaleString()} - `}

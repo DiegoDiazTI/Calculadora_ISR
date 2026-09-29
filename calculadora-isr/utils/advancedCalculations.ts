@@ -2,14 +2,14 @@
 // ACTUALIZADO: Soporte para cálculo por mes en Actividad Empresarial
 
 import { CalculationResult, TaxBracket } from '@/types';
-import { 
-  RESICO_TAX_TABLE_ANUAL_2025,
-  RESICO_TAX_TABLE_2025, 
-  RESICO_MAX_INCOME, 
+import {
+  RESICO_TAX_TABLE_ANUAL,
+  RESICO_TAX_TABLE_MENSUAL,
+  RESICO_MAX_INCOME,
   PERSONA_MORAL_RATE,
-  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
+  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL,
   TaxBracketWithQuota
-} from '@/constants/TaxTables';
+} from '@/constants/taxTables';
 
 export interface ResicoAdvancedData {
   totalIncome: number;
@@ -61,8 +61,8 @@ export const calculateAdvancedResico = (
 
   // Seleccionar tabla según periodo
   const table = period === 'mensual' 
-    ? RESICO_TAX_TABLE_2025 
-    : RESICO_TAX_TABLE_ANUAL_2025;
+    ? RESICO_TAX_TABLE_MENSUAL 
+    : RESICO_TAX_TABLE_ANUAL;
 
   let bracket: TaxBracket | null = null;
   for (let b of table) {
@@ -170,7 +170,7 @@ export const calculateAdvancedEmpresarial = (
  * Multiplica los límites y cuota fija por el número de mes
  */
 const getTablaParaMes = (mesNumero: number): TaxBracketWithQuota[] => {
-  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map((bracket: TaxBracketWithQuota) => ({
+  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL.map((bracket: TaxBracketWithQuota) => ({
     ...bracket,
     min: bracket.min * mesNumero,
     max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * mesNumero,
@@ -258,7 +258,7 @@ export const estimateMonthlyPayment = (annualIncome: number, month: number): num
   const monthlyIncome = annualIncome / 12;
   const accumulatedIncome = monthlyIncome * month;
   
-  for (let bracket of RESICO_TAX_TABLE_2025) {
+  for (let bracket of RESICO_TAX_TABLE_MENSUAL) {
     if (accumulatedIncome >= bracket.min && accumulatedIncome <= bracket.max) {
       return accumulatedIncome * bracket.rate;
     }

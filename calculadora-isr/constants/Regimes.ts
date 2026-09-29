@@ -2,11 +2,11 @@
 // Configuración de regímenes fiscales
 
 import { RegimeConfig } from '@/types';
-import { 
-  RESICO_CHARACTERISTICS, 
+import {
+  RESICO_CHARACTERISTICS,
   ACTIVIDAD_EMPRESARIAL_CHARACTERISTICS,
-  PERSONA_MORAL_CHARACTERISTICS 
-} from './TaxTables';
+  PERSONA_MORAL_CHARACTERISTICS
+} from './taxTables';
 
 export const REGIMES: RegimeConfig[] = [
   {

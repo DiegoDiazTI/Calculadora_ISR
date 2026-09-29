@@ -2,14 +2,12 @@
 // Funciones para cálculos de ISR con mejor manejo de errores
 
 import { CalculationResult, TaxBracket } from '@/types';
-import { 
-  RESICO_TAX_TABLE_ANUAL_2025,
-  RESICO_TAX_TABLE_2025, 
-  RESICO_MAX_INCOME, 
-  PERSONA_MORAL_RATE,
-  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
-  TaxBracketWithQuota
-} from '@/constants/TaxTables';
+import {
+  RESICO_TAX_TABLE_MENSUAL,
+  RESICO_MAX_INCOME,
+  TaxBracketWithQuota,
+  getTaxTables,
+} from '@/constants/taxTables';
 
 /**
  * Valida y limpia un número de entrada
@@ -28,9 +26,12 @@ const validateNumber = (value: number): number => {
 
 /**
  * Obtiene la tabla anual de Actividad Empresarial usando el mes indicado
+ * @param month - Mes acumulado (1-12)
+ * @param year - Año fiscal a usar; por defecto el año vigente (CURRENT_TAX_YEAR)
  */
-const getActividadEmpresarialTableForMonth = (month: number): TaxBracketWithQuota[] => {
-  return ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.map((bracket: TaxBracketWithQuota) => ({
+const getActividadEmpresarialTableForMonth = (month: number, year?: number): TaxBracketWithQuota[] => {
+  const baseTable = getTaxTables(year).actividadEmpresarialMensual;
+  return baseTable.map((bracket: TaxBracketWithQuota) => ({
     ...bracket,
     min: bracket.min * month,
     max: bracket.max === 999999999.99 ? 999999999.99 : bracket.max * month,
@@ -42,19 +43,18 @@ const getActividadEmpresarialTableForMonth = (month: number): TaxBracketWithQuot
  * Calcula el ISR para régimen RESICO
  * @param income - Ingreso (mensual o anual según periodo)
  * @param period - 'mensual' o 'anual'
+ * @param year - Año fiscal a usar; por defecto el año vigente (CURRENT_TAX_YEAR)
  * @returns Resultado del cálculo
  */
 export const calculateResicoISR = (
-  income: number, 
-  period: 'mensual' | 'anual' = 'anual'
+  income: number,
+  period: 'mensual' | 'anual' = 'anual',
+  year?: number
 ): CalculationResult => {
   // Validación robusta de entrada
   const validIncome = validateNumber(income);
-  
-  console.log('RESICO Cálculo:', { income, validIncome, period }); // Debug
-  
+
   if (validIncome <= 0) {
-    console.log('RESICO: Ingreso inválido o cero');
     return {
       tax: 0,
       rate: 0,
@@ -63,12 +63,11 @@ export const calculateResicoISR = (
     };
   }
 
-  // Seleccionar tabla según periodo
+  // Seleccionar tabla según periodo (y año fiscal, si se especifica)
+  const yearTables = getTaxTables(year);
   const table = period === 'mensual'
-    ? RESICO_TAX_TABLE_2025
-    : RESICO_TAX_TABLE_ANUAL_2025;
-
-  console.log('RESICO: Usando tabla', period, 'con', table.length, 'tramos');
+    ? yearTables.resicoMensual
+    : yearTables.resicoAnual;
 
   // Si excede el limite del ultimo tramo, usar la tasa maxima
   const maxBracket = table[table.length - 1];
@@ -86,20 +85,16 @@ export const calculateResicoISR = (
   for (let bracket of table) {
     if (validIncome >= bracket.min && validIncome <= bracket.max) {
       const tax = validIncome * bracket.rate;
-      const result = {
+      return {
         tax: tax,
         rate: bracket.rate * 100,
         bracket: `$${Math.floor(bracket.min).toLocaleString('en-US')} - $${Math.floor(bracket.max).toLocaleString('en-US')}`,
         netIncome: validIncome - tax,
       };
-      
-      console.log('RESICO: Resultado calculado', result); // Debug
-      return result;
     }
   }
 
   // Caso por defecto (no debería llegar aquí)
-  console.error('RESICO: No se encontró tramo para ingreso', validIncome);
   return {
     tax: 0,
     rate: 0,
@@ -111,16 +106,14 @@ export const calculateResicoISR = (
 /**
  * Calcula el ISR para Persona Moral
  * @param utilityFiscal - Utilidad fiscal anual
+ * @param year - Año fiscal a usar; por defecto el año vigente (CURRENT_TAX_YEAR)
  * @returns Resultado del cálculo
  */
-export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
+export const calculateMoralISR = (utilityFiscal: number, year?: number): CalculationResult => {
   // Validación robusta de entrada
   const validUtility = validateNumber(utilityFiscal);
-  
-  console.log('MORAL Cálculo:', { utilityFiscal, validUtility }); // Debug
-  
+
   if (validUtility <= 0) {
-    console.log('MORAL: Utilidad inválida o cero');
     return {
       tax: 0,
       rate: 0,
@@ -129,16 +122,14 @@ export const calculateMoralISR = (utilityFiscal: number): CalculationResult => {
     };
   }
 
-  const tax = validUtility * PERSONA_MORAL_RATE;
-  const result = {
+  const rate = getTaxTables(year).personaMoralRate;
+  const tax = validUtility * rate;
+  return {
     tax: tax,
-    rate: PERSONA_MORAL_RATE * 100,
+    rate: rate * 100,
     bracket: 'Tasa General',
     netIncome: validUtility - tax,
   };
-  
-  console.log('MORAL: Resultado calculado', result); // Debug
-  return result;
 };
 
 /**
@@ -175,7 +166,7 @@ export const calculateMonthlyResicoISR = (
   const validAccumulated = validateNumber(accumulatedIncome);
   
   const totalIncome = validAccumulated + validMonthly;
-  const bracket = getTaxBracket(totalIncome, RESICO_TAX_TABLE_2025);
+  const bracket = getTaxBracket(totalIncome, RESICO_TAX_TABLE_MENSUAL);
   
   if (!bracket) return 0;
   
@@ -224,19 +215,18 @@ export const projectAnnualISR = (monthlyIncome: number): CalculationResult => {
  * Calcula el ISR para Actividad Empresarial (tabla por mes acumulado)
  * @param taxableBase - Base gravable (ingresos - deducciones)
  * @param month - Mes acumulado (1-12)
+ * @param year - Año fiscal a usar; por defecto el año vigente (CURRENT_TAX_YEAR)
  * @returns Resultado del cálculo
  */
 export const calculateActividadEmpresarialISR = (
   taxableBase: number,
-  month: number = 12
+  month: number = 12,
+  year?: number
 ): CalculationResult => {
   // Validación robusta de entrada
   const validBase = validateNumber(taxableBase);
-  
-  console.log('EMPRESARIAL C?lculo:', { taxableBase, validBase, month }); // Debug
-  
+
   if (validBase <= 0) {
-    console.log('EMPRESARIAL: Base gravable inválida o cero');
     return {
       tax: 0,
       rate: 0,
@@ -246,7 +236,7 @@ export const calculateActividadEmpresarialISR = (
   }
 
   // Tabla por mes seleccionado (acumulado) para calculadora simple
-  const annualTable = getActividadEmpresarialTableForMonth(month);
+  const annualTable = getActividadEmpresarialTableForMonth(month, year);
   let tax = 0;
   let rate = 0;
   let bracketString = 'N/A';
@@ -261,13 +251,10 @@ export const calculateActividadEmpresarialISR = (
     }
   }
 
-  const result = {
+  return {
     tax,
     rate,
     bracket: bracketString,
     netIncome: validBase - tax,
   };
-
-  console.log('EMPRESARIAL: Resultado calculado', result); // Debug
-  return result;
 };

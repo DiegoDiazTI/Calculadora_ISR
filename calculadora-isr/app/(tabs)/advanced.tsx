@@ -35,11 +35,11 @@ import { REGIMES } from '@/constants/Regimes';
 import SwipeTabsWrapper from '@/components/navigation/SwipeTabsWrapper';
 
 import {
-  RESICO_TAX_TABLE_ANUAL_2025,
-  RESICO_TAX_TABLE_2025,
-  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025,
+  RESICO_TAX_TABLE_ANUAL,
+  RESICO_TAX_TABLE_MENSUAL,
+  ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL,
   PERSONA_MORAL_RATE,
-} from '@/constants/TaxTables';
+} from '@/constants/taxTables';
 
 const HEADER_BG = '#000000';
 
@@ -105,9 +105,9 @@ export default function Advanced() {
   const totals = getTotals();
 
   const resicoTableData =
-    resicoPeriod === 'mensual' ? RESICO_TAX_TABLE_2025 : RESICO_TAX_TABLE_ANUAL_2025;
+    resicoPeriod === 'mensual' ? RESICO_TAX_TABLE_MENSUAL : RESICO_TAX_TABLE_ANUAL;
 
-  const empresarialTableData = ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL_2025.slice(0, 5).map((b) => ({
+  const empresarialTableData = ACTIVIDAD_EMPRESARIAL_TABLE_MENSUAL.slice(0, 5).map((b) => ({
     min: b.min * 12,
     max: b.max === 999999999.99 ? b.max : b.max * 12,
     fixedFee: b.fixedFee * 12,

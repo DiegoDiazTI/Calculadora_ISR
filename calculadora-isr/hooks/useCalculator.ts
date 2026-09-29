@@ -2,7 +2,6 @@
 // Los inputs inician vacíos, solo muestran ejemplos como placeholders
 
 import { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
 import { RegimeType, CalculationResult } from '@/types';
 import {
   calculateResicoISR,
@@ -131,43 +130,22 @@ export const useCalculator = (
    * Calcula el ISR según el régimen ACTUAL (initialRegime)
    */
   const calculateISR = () => {
-    console.log('==========================================');
-    console.log('🔍 DIAGNÓSTICO DE CÁLCULO ISR');
-    console.log('==========================================');
-    console.log('📱 Plataforma:', Platform.OS, 'v' + Platform.Version);
-    console.log('📊 Régimen seleccionado:', initialRegime);
-    console.log('💰 Ingreso RAW:', annualIncome);
-    console.log('📉 Deducciones RAW:', deductions);
-    console.log('🔢 Coeficiente:', utilityCoefficient);
-    console.log('📅 Periodo RESICO:', resicoPeriod);
-
     const income = parseCurrency(annualIncome);
     const deduct = parseCurrency(deductions);
-
-    console.log('✅ Ingreso PARSEADO:', income);
-    console.log('✅ Deducciones PARSEADAS:', deduct);
 
     let calculationResult: CalculationResult;
 
     if (initialRegime === 'RESICO') {
-      console.log('🟢 Calculando RESICO...');
       calculationResult = calculateResicoISR(income, resicoPeriod);
-      console.log('🟢 Resultado RESICO:', calculationResult);
     } else if (initialRegime === 'MORAL') {
-      console.log('🟣 Calculando MORAL...');
       const coefficient = parseFloat(utilityCoefficient || '0');
       const utilidadFiscal = income * coefficient;
-      console.log('   Utilidad fiscal:', utilidadFiscal);
 
       calculationResult = calculateMoralISR(utilidadFiscal);
-      console.log('🟣 Resultado MORAL:', calculationResult);
     } else if (initialRegime === 'EMPRESARIAL') {
-      console.log('🟡 Calculando EMPRESARIAL...');
       const taxableBase = income - deduct;
-      console.log('   Base gravable:', taxableBase);
 
       if (taxableBase <= 0) {
-        console.log('⚠️ Base gravable negativa o cero');
         calculationResult = {
           tax: 0,
           rate: 0,
@@ -178,9 +156,7 @@ export const useCalculator = (
         const monthForCalc = empresarialPeriod === 'anual' ? 12 : selectedMonth + 1;
         calculationResult = calculateActividadEmpresarialISR(taxableBase, monthForCalc);
       }
-      console.log('🟡 Resultado EMPRESARIAL:', calculationResult);
     } else {
-      console.log('⚪ Régimen no reconocido, resultado vacío');
       calculationResult = {
         tax: 0,
         rate: 0,
@@ -189,17 +165,8 @@ export const useCalculator = (
       };
     }
 
-    console.log('📋 RESULTADO FINAL:');
-    console.log('    ISR:', calculationResult.tax);
-    console.log('    Tasa:', calculationResult.rate);
-    console.log('    Tramo:', calculationResult.bracket);
-    console.log('    Neto:', calculationResult.netIncome);
-
-    console.log('🔄 Actualizando estado: showResults = TRUE');
     setResult(calculationResult);
     setShowResults(true);
-    console.log('✅ Estado actualizado');
-    console.log('==========================================');
   };
 
   /**
