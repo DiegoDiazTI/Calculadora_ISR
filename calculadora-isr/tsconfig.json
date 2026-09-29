@@ -2,7 +2,6 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@/components/*": ["./components/*"],
@@ -10,9 +9,9 @@
       "@/hooks/*": ["./hooks/*"],
       "@/utils/*": ["./utils/*"],
       "@/types": ["./types"],
-      "@/types/*": ["./types/*"],
-      "typeRoots": ["./types", "./node_modules/@types"]
-    }
+      "@/types/*": ["./types/*"]
+    },
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": [
     "**/*.ts",
