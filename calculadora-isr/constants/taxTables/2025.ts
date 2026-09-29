@@ -2,6 +2,12 @@
 // Tabla fiscal del ejercicio 2025. Valores tomados de las tarifas publicadas
 // por el SAT/DOF para RESICO, Actividad Empresarial y Persona Moral.
 //
+// RESICO: tabla mensual = Art. 113-E LISR, tabla anual = Art. 113-F LISR.
+// El tramo anual de 2.00% termina en $2,500,000.00 (verificado contra el
+// texto vigente de la ley en https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf
+// — corregido después de que un valor de $2,000,000.00, propagado desde
+// varios resúmenes de terceros, se coló aquí originalmente).
+//
 // Para agregar el año 2026 (o el que siga): copia este archivo a 2026.ts,
 // actualiza `year` y los valores, y regístralo en ./index.ts. Ver README.md
 // de esta carpeta para el procedimiento completo.
@@ -25,8 +31,8 @@ export const TAX_TABLES_2025: FiscalYearTaxTables = {
     { min: 0.01, max: 300000.00, rate: 0.01 },        // 1.00%
     { min: 300000.01, max: 600000.00, rate: 0.011 },  // 1.10%
     { min: 600000.01, max: 1000000.00, rate: 0.015 }, // 1.50%
-    { min: 1000000.01, max: 2000000.00, rate: 0.02 }, // 2.00%
-    { min: 2000000.01, max: 3500000.00, rate: 0.025 },// 2.50%
+    { min: 1000000.01, max: 2500000.00, rate: 0.02 }, // 2.00%
+    { min: 2500000.01, max: 3500000.00, rate: 0.025 },// 2.50%
   ],
 
   resicoMaxIncome: 3500000,

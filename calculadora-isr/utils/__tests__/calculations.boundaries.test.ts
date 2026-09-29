@@ -45,6 +45,23 @@ describe('RESICO 2025/2026 - anual (sin cambios entre años)', () => {
     expect(result.rate).toBeCloseTo(1.1, 5);
     expect(result.tax).toBeCloseTo(3300.0, 2);
   });
+
+  // Límite exacto $2,500,000.00 / $2,500,000.01 (Art. 113-F LISR). Un valor
+  // de $2,000,000.00 se coló aquí originalmente (propagado desde resúmenes
+  // de terceros) — verificado y corregido contra el texto oficial de la ley
+  // en https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf. Estos casos
+  // existen para que ese error no se vuelva a colar.
+  it.each([2025, 2026])('%i: $2,500,000.00 (tope del tramo de 2.00%) da ISR de $50,000', (year) => {
+    const result = calculateResicoISR(2500000.00, 'anual', year);
+    expect(result.rate).toBeCloseTo(2, 5);
+    expect(result.tax).toBeCloseTo(50000.0, 2);
+  });
+
+  it.each([2025, 2026])('%i: $2,500,000.01 ya cae en el tramo de 2.50%', (year) => {
+    const result = calculateResicoISR(2500000.01, 'anual', year);
+    expect(result.rate).toBeCloseTo(2.5, 5);
+    expect(result.tax).toBeCloseTo(62500.0, 2);
+  });
 });
 
 describe('Actividad Empresarial 2025 (tabla base, mes 1)', () => {

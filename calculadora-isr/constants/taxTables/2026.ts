@@ -8,10 +8,15 @@
 // - Actividad Empresarial: tabla "VI. Tarifa del mes de enero de 2026...
 //   artículo 106 de la Ley del ISR" (Título IV, Cap. II, Sección I) — subió
 //   por el factor de actualización 1.1321 respecto a 2025.
-// - RESICO: sin cambios respecto a 2025. Los tramos del Art. 113-E de la
-//   LISR no se indexan por inflación como la tarifa progresiva — no aparecen
-//   en el Anexo 8, y varias fuentes (El Contribuyente, ContadorMx) confirman
-//   "sin cambios en las tasas de RESICO para 2026".
+// - RESICO: sin cambios respecto a 2025. Tabla mensual = Art. 113-E LISR,
+//   tabla anual = Art. 113-F LISR (texto vigente, última reforma DOF
+//   01-04-2024, verificado directo en
+//   https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf). Estos tramos no
+//   se indexan por inflación como la tarifa progresiva — no aparecen en el
+//   Anexo 8.
+//   ⚠️ El tramo anual de 2.00% termina en $2,500,000.00 (no $2,000,000.00
+//   como decían varios resúmenes de terceros, incluido este archivo hasta
+//   que se corrigió) — verificado línea por línea contra el Art. 113-F.
 // - Persona Moral: 30% fijo (Art. 9 LISR), sin cambios.
 
 import { FiscalYearTaxTables } from './types';
@@ -33,8 +38,8 @@ export const TAX_TABLES_2026: FiscalYearTaxTables = {
     { min: 0.01, max: 300000.00, rate: 0.01 },        // 1.00%
     { min: 300000.01, max: 600000.00, rate: 0.011 },  // 1.10%
     { min: 600000.01, max: 1000000.00, rate: 0.015 }, // 1.50%
-    { min: 1000000.01, max: 2000000.00, rate: 0.02 }, // 2.00%
-    { min: 2000000.01, max: 3500000.00, rate: 0.025 },// 2.50%
+    { min: 1000000.01, max: 2500000.00, rate: 0.02 }, // 2.00%
+    { min: 2500000.01, max: 3500000.00, rate: 0.025 },// 2.50%
   ],
 
   resicoMaxIncome: 3500000,
